@@ -26,7 +26,7 @@
 #define ELEMENT_OF_GROUP_T_HPP_INCLUDED
 
 #include <set>
-#include "group_binop_t.hpp"
+#include "binop_t.hpp"
 //#include "element_of_set_t.hpp"
 
 // GROUP_BINOP_T<group_name gn, uint Ns_head, uint ... Ns_tail>

@@ -258,7 +258,7 @@ namespace tfg{
 				const elem_gr_t inv_ui_inv_vj{
 					gr_t::bop(inv_ui,inv_vj)
 				};
-				/// A PARTIR DE AQUÍ
+				/// A PARTIR DE AQUI
 				/// NO SE HAN HECHO
 				/// LAS CUENTAS TIPO
 				/// u^-i * v^-j
@@ -306,7 +306,7 @@ namespace tfg{
 				const elem_gr_t inv_vj_inv_ui{
 					gr_t::bop(inv_vj,inv_ui)
 				};
-				/// A PARTIR DE AQUÍ
+				/// A PARTIR DE AQUI
 				/// NO SE HAN HECHO
 				/// LAS CUENTAS TIPO
 				/// v^-j * u^-i
@@ -354,7 +354,7 @@ namespace tfg{
 				const elem_gr_t inv_ui_inv_wk{
 					gr_t::bop(inv_ui,inv_wk)
 				};
-				/// A PARTIR DE AQUÍ
+				/// A PARTIR DE AQUI
 				/// NO SE HAN HECHO
 				/// LAS CUENTAS TIPO
 				/// u^-i * w^-k
@@ -402,7 +402,7 @@ namespace tfg{
 				const elem_gr_t inv_wk_inv_ui{
 					gr_t::bop(inv_wk,inv_ui)
 				};
-				/// A PARTIR DE AQUÍ
+				/// A PARTIR DE AQUI
 				/// NO SE HAN HECHO
 				/// LAS CUENTAS TIPO
 				/// w^-k * u^-i
@@ -450,7 +450,7 @@ namespace tfg{
 				const elem_gr_t inv_vj_inv_wk{
 					gr_t::bop(inv_vj,inv_wk)
 				};
-				/// A PARTIR DE AQUÍ
+				/// A PARTIR DE AQUI
 				/// NO SE HAN HECHO
 				/// LAS CUENTAS TIPO
 				/// v^-j * w^-k
@@ -498,7 +498,7 @@ namespace tfg{
 				const elem_gr_t inv_wk_inv_vj{
 					gr_t::bop(inv_wk,inv_vj)
 				};
-				/// A PARTIR DE AQUÍ
+				/// A PARTIR DE AQUI
 				/// NO SE HAN HECHO
 				/// LAS CUENTAS TIPO
 				/// w^-k * v^-j

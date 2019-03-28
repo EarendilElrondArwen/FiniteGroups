@@ -34,7 +34,30 @@
 #include "basic_types.hpp"
 
 namespace tfg::impl {
+	
+	template< typename A >
+	struct is_integer_type {
+		static constexpr bool value{is_integer_type::get_value()};
+		
+		static constexpr 
+		bool get_value() {
+			if constexpr (
+				std::is_same_v<A,uint>   ||
+				std::is_same_v<A,usint>  ||
+				std::is_same_v<A,ulint>  ||
+				std::is_same_v<A,ullint> ||
+				std::is_same_v<A,sint>	||
+				std::is_same_v<A,ssint>	||
+				std::is_same_v<A,slint>	||
+				std::is_same_v<A,sllint>		
+			) 
+				return true;
+			else 
+				return false;
+		} 
+	};
 
+		
 	template<	typename A ,
 				typename B	>
 	struct less_equal {

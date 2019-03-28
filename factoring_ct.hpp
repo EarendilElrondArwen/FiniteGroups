@@ -36,11 +36,11 @@ std::tuple<
 	using SInt_t = signed_for_unsigned_t<Int_t>;
 	// Base Case
 	if (Mod==0) {
-		return make_tuple(a,0,0);
+		return make_tuple(0,0,0);
 	} else if (a == 1) {
 		return make_tuple(1,1,0);
 	} else if (Mod == 1) {
-		return make_tuple(1,0,1);
+		return make_tuple(0,0,0);
 	} else if (a == Mod-1) {
 		return make_tuple(1,-1,1);
 	} else if (a == 0) { 
@@ -73,13 +73,13 @@ std::tuple<
 	}
 } 
   
-// C++ function to find modulo inverse of a 
+// C++ function to find modular inverse of "a" 
 template<typename Int_t,Int_t Mod>
 inline constexpr
 signed_for_unsigned_t<Int_t> modInv(Int_t a) 
 {
-	using SInt_t = signed_for_unsigned_t<Int_t>;
-	const std::tuple<SInt_t,SInt_t,SInt_t> g{gcdExtd<Int_t,Mod>(a)}; 
+	using SInt_t = next_int_t<signed_for_unsigned_t<Int_t>>;
+	const std::tuple<SInt_t,SInt_t,SInt_t> g{gcdExtd<SInt_t,Mod>(a)}; 
     if (get<0>(g) != 1) 
         return SInt_t(0); 
     else

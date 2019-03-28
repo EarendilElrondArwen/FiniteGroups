@@ -111,11 +111,7 @@ namespace tfg
   inline constexpr
   decltype(auto) tail(tuple<Ts...> t) {
 	constexpr size_t tp_sz 	= (sizeof...(Ts));
-	if constexpr (tp_sz==0) {
-		(void)t;
-		return make_tuple();
-	}
-	else if constexpr (tp_sz==1) {
+	if constexpr (tp_sz<=1) {
 		(void)t;
 		return make_tuple();
 	}
@@ -365,7 +361,8 @@ namespace tfg
 		typename TT
   >
   inline constexpr
-  auto build_tuple_from_list (
+  auto
+  build_tuple_from_list (
 	const initializer_list<IntType> & lista
   )
   ->
@@ -390,38 +387,38 @@ namespace tfg
 				>{}
 		);
   }
-
-  template<class ... Ts>
-  inline constexpr ostream& operator << (
-	ostream& os,
-	const tuple<Ts...> & t
-  ) {
-	constexpr size_t tp_sz 	= (sizeof...(Ts));
-	if constexpr (tp_sz>1) {
-		impl::show_elements_impl(
-			os,
-			t,
-			make_index_sequence<
-				tp_sz-1
-			>{}
-		);
+    
+	template<
+		typename UInt_t	    ,				// UIntType
+		UInt_t ... Ns	    ,				// Modulos
+		template<
+			typename,						//   UIntType
+			unsigned_for_signed_t<UInt_t>  	//   Modulo
+		> typename TT,						// int_mod_N
+		typename ... IntType_s				// types of the argument tuple
+	>
+	inline constexpr
+	auto build_from_tuple_of_ints(
+			tuple<IntType_s...> t
+	)
+	-> tuple<TT<unsigned_for_signed_t<UInt_t>,Ns>...>
+	{
+		using UUInt_t = unsigned_for_signed_t<UInt_t>;
+		using tuple_ret_type = tuple<TT<UUInt_t,Ns>...>;
+		constexpr size_t tup_ret_sz{tuple_size_v<tuple_ret_type>};
+		using tuple_arg_type = tuple<IntType_s...>;
+		constexpr size_t tup_arg_sz{tuple_size_v<tuple_arg_type>};
+		static_assert(tup_ret_sz==tup_arg_sz);
+		return 
+			impl::build_from_tuple_of_ints_impl<
+					UInt_t,
+					Ns...,
+					TT,
+					IntType_s ...
+				>(
+					t,
+					make_index_sequence<tup_ret_sz>{}
+				);
 	}
-	else if constexpr (tp_sz==1) {
-		os << "(" << head_value(t);
-		(void)t;
-	}
-	else {
-		os << "(";
-		(void)t;
-	}
-	if constexpr (tp_sz>1) {
-		os << root_value(t);
-	}
-	else if constexpr(tp_sz <= 1) {
-		(void)t;
-	}
-	os << ")";
-	return os;
-  }
 }
 #endif // TUPLE_T_HPP_INCLUDED

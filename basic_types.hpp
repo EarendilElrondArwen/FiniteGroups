@@ -57,6 +57,38 @@ using ssint		= 	int16_t	;
 using slint		= 	int32_t	;
 using sllint	= 	int64_t	;
 
+inline constexpr uint 
+operator "" _u8( ullint arg ) noexcept
+{return static_cast< uint >( arg );}
+
+inline constexpr usint 
+operator "" _u16( ullint arg ) noexcept
+{return static_cast< usint >( arg );}
+
+inline constexpr uint 
+operator "" _u32( ullint arg ) noexcept
+{return static_cast< ulint >( arg );}
+
+inline constexpr ullint 
+operator "" _u64( ullint arg ) noexcept
+{return static_cast< ullint >( arg );}
+/*
+inline constexpr int8_t 
+operator "" _si8( int64_t arg ) noexcept
+{return static_cast< int8_t >( arg );}
+
+inline constexpr int16_t 
+operator "" _si16( int64_t arg ) noexcept
+{return static_cast< int16_t >( arg );}
+
+inline constexpr int32_t 
+operator "" _si32( int64_t arg ) noexcept
+{return static_cast< int32_t >( arg );}
+
+inline constexpr int64_t 
+operator "" _si64( int64_t arg ) noexcept
+{return static_cast< int64_t >( arg );}
+*/
 struct null_t {
 	using type = null_t;
 };

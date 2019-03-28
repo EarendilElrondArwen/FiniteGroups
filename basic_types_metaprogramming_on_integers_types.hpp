@@ -30,12 +30,22 @@
 #include <cmath>
 #include <string>
 #include <limits>
+#include <type_traits>
 
 #include"basic_types_metaprogramming_on_integers_types_IMPL.hpp"
 
 namespace tfg {
+using std::is_same;
+using std::is_same_v;
+using std::is_integral;
 using std::is_integral_v;
+using std::conditional;
 using std::conditional_t;
+
+template<typename A>
+inline constexpr
+bool is_integer_type_v =
+		impl::is_integer_type<A>::value;
 
 template<typename A,typename B>
 inline constexpr
@@ -49,11 +59,11 @@ bool is_signed_int_t_v =
 
 template<typename T>
 inline constexpr
-bool is_unsigned_int_t_v =
+bool 	is_unsigned_int_t_v =
 		impl::is_unsigned_int_type<T>::value;
 
 template<typename T>
-using unsigned_for_signed_t = typename
+using 	unsigned_for_signed_t = typename
 		impl::unsigned_type_for_signed_type<T>::type;
 
 template<typename T>
@@ -61,36 +71,35 @@ using	signed_for_unsigned_t =	typename
 		impl::signed_type_for_unsigned_type<T>::type;
 
 template<typename T>
-using next_int_t = typename
+using 	next_int_t = typename
 		impl::next_int_type<T>::type;
-}
 
 template<typename Int_t,typename UIntType,UIntType N>
-constexpr
+inline constexpr
 UIntType to_UIntType(Int_t k) {
 		static_assert(
-			is_integral_v<UIntType>,
+			is_integer_type_v<UIntType>,
 			"El tipo UIntType debe ser entero"
 		);
 		static_assert(
-			is_integral_v<Int_t>		,
+			is_integer_type_v<Int_t>		,
 			"El tipo Int_t debe ser entero"
 		);
 		static_assert(
-			is_integral_v<decltype(k)>	,
+			is_integer_type_v<decltype(k)>	,
 			"El tipo del argumento no es un entero"
 		);
 		using SIntType1 = next_int_t<signed_for_unsigned_t<UIntType>>;
 		using SIntType2 = next_int_t<signed_for_unsigned_t<Int_t>>;
 		using SIntType  = 
-			std::conditional_t<
+			conditional_t<
 				less_equal_v<
 					SIntType1,SIntType2
 				>,
 						SIntType2,
 						SIntType1
 			>;
-		const SIntType new_k=k;
+		const SIntType new_k=static_cast<SIntType>(k);
 		using LSIntType = next_int_t<SIntType>;
 		static_assert(
 			is_integral_v<LSIntType>,
@@ -119,10 +128,8 @@ UIntType to_UIntType(Int_t k) {
 		} else	if constexpr  (is_unsigned_int_t_v<Int_t>) { 
 			return UIntType(new_k%N);
 		} else {
-			static_assert(
-				false,
-				"Que conho es Int_t?"
-			);
+			return UIntType(new_k%N);
 		}
 	}
+}
 #endif // BASIC_TYPES_METAPROGRAMMING_ON_INTEGRAL_TYPES__HPP___INCLUDED
