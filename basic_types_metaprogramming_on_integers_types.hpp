@@ -82,11 +82,11 @@ UIntType to_UIntType(Int_t k) {
 			"El tipo UIntType debe ser entero"
 		);
 		static_assert(
-			is_integer_type_v<Int_t>		,
+			is_integral_v<Int_t>		,
 			"El tipo Int_t debe ser entero"
 		);
 		static_assert(
-			is_integer_type_v<decltype(k)>	,
+			is_integral_v<decltype(k)>	,
 			"El tipo del argumento no es un entero"
 		);
 		using SIntType1 = next_int_t<signed_for_unsigned_t<UIntType>>;
@@ -99,7 +99,7 @@ UIntType to_UIntType(Int_t k) {
 						SIntType2,
 						SIntType1
 			>;
-		const SIntType new_k=static_cast<SIntType>(k);
+		const SIntType new_k{static_cast<SIntType>(k)};
 		using LSIntType = next_int_t<SIntType>;
 		static_assert(
 			is_integral_v<LSIntType>,

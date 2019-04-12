@@ -56,22 +56,34 @@ using sint		= 	int8_t	;
 using ssint		= 	int16_t	;
 using slint		= 	int32_t	;
 using sllint	= 	int64_t	;
+using ui_8		= 	uint8_t	;
+using ui_16		= 	uint16_t;
+using ui_32		= 	uint32_t;
+using ui_64		= 	uint64_t;
+using ui_128	=	__uint128_t;
+using si_8		= 	int8_t	;
+using si_16		= 	int16_t	;
+using si_32		= 	int32_t	;
+using si_64		= 	int64_t	;
+using si_128	=	__int128_t;
 
-inline constexpr uint 
-operator "" _u8( ullint arg ) noexcept
-{return static_cast< uint >( arg );}
+inline constexpr ui_8 
+operator "" _ui8( ui_64 arg ) noexcept
+{return static_cast< ui_8 >( arg );}
 
-inline constexpr usint 
-operator "" _u16( ullint arg ) noexcept
-{return static_cast< usint >( arg );}
+inline constexpr ui_16
+operator "" _ui16( ui_64 arg ) noexcept
+{return static_cast< ui_16 >( arg );}
 
-inline constexpr uint 
-operator "" _u32( ullint arg ) noexcept
-{return static_cast< ulint >( arg );}
+inline constexpr ui_32 
+operator "" _ui32( ui_64 arg ) noexcept
+{return static_cast< ui_32 >( arg );}
 
-inline constexpr ullint 
-operator "" _u64( ullint arg ) noexcept
-{return static_cast< ullint >( arg );}
+inline constexpr ui_64 
+operator "" _ui64( ui_64 arg ) noexcept
+{return static_cast< ui_64 >( arg );}
+
+
 /*
 inline constexpr int8_t 
 operator "" _si8( int64_t arg ) noexcept
@@ -94,7 +106,7 @@ struct null_t {
 };
 
 
-enum class group_name : uint
+enum class group_name : ui_8
 {
 	T=1,
 	C=2,
@@ -119,7 +131,7 @@ enum class group_name : uint
 };
 
 inline constexpr
-ullint to_ullint(group_name);
+size_t to_unsigned(group_name);
 std::string to_string(group_name);
 inline constexpr bool operator <(group_name, group_name);
 inline constexpr bool operator <=(group_name, group_name);
@@ -127,7 +139,7 @@ inline constexpr bool operator >(group_name, group_name);
 inline constexpr bool operator >=(group_name, group_name);
 
 inline constexpr
-ullint to_ullint(group_name arg) {
+size_t to_unsigned(group_name arg) {
 	switch(arg) {
 	case group_name::T 				:	return 1;
 	case group_name::C 				:	return 2;
@@ -227,22 +239,22 @@ std::string to_string(group_name arg)
 
 inline constexpr
 bool operator<(group_name a,group_name b) {
-	return(to_ullint(a) < to_ullint(b));
+	return(to_unsigned(a) < to_unsigned(b));
 }
 
 inline constexpr
 bool operator<=(group_name a,group_name b) {
-	return(to_ullint(a) <= to_ullint(b));
+	return(to_unsigned(a) <= to_unsigned(b));
 }
 
 inline constexpr
 bool operator>(group_name a,group_name b) {
-	return(to_ullint(a) > to_ullint(b));
+	return(to_unsigned(a) > to_unsigned(b));
 }
 
 inline constexpr
 bool operator>=(group_name a,group_name b) {
-	return(to_ullint(a) >= to_ullint(b));
+	return(to_unsigned(a) >= to_unsigned(b));
 }
 
 }

@@ -55,32 +55,44 @@ namespace tfg {
   using std::array;
 
 template <typename UIntType,UIntType N_n,UIntType ... N_nm1>
-struct modint_cartprod_t {
+class modint_cartprod_t {
 public:
-	static constexpr auto mod_tup() {return make_tuple(N_n,N_nm1...);}; 
-private:
+	static constexpr auto mod_tup() -> decltype(make_tuple(N_n,N_nm1...)) {
+		const auto result{make_tuple(N_n,N_nm1...)};
+		return result;
+	}
+	
+	template<size_t idx> static constexpr
+	UIntType mod_idx() {
+		static_assert(idx < dim(),"fuera de rango");
+		const auto modulos{mod_tup()};
+		const UIntType result{get<idx>(modulos)};
+		return (result);
+	}
+	
+private: // non inline implementations of min and max of a variadic paramenter pack of integers
 	
 	template<UIntType Mod_n,UIntType ... Mod_nm1>
-	inline static constexpr
-	UIntType
-	min_of_int_pack() {
+	static constexpr
+	UIntType min_of_int_pack() {
 		if constexpr ((sizeof...(Mod_nm1))==0)
 			return Mod_n;
 		else
 			return min(Mod_n,min_of_int_pack<Mod_nm1...>());
 	}
+	
 	template<UIntType Mod_n,UIntType ... Mod_nm1>
-	inline static constexpr
-	UIntType
-	max_of_int_pack() {
+	static constexpr
+	UIntType max_of_int_pack() {
 		if constexpr ((sizeof...(Mod_nm1))==0)
 			return Mod_n;
 		else
 			return max(Mod_n,max_of_int_pack<Mod_nm1...>());
 	}
+	
 public:
 	
-	inline static constexpr 
+	static constexpr 
 	UIntType max_mod() {
 		if constexpr (dim()==0)
 			return N_n;
@@ -88,7 +100,7 @@ public:
 			return max_of_int_pack<N_n,N_nm1...>();
 	}
 	
-	inline static constexpr 
+	static constexpr 
 	UIntType min_mod() {
 		if constexpr (dim()==0)
 			return N_n;
@@ -96,7 +108,7 @@ public:
 			return min_of_int_pack<N_n,N_nm1...>();
 	}
 	
-	inline static constexpr 
+	static constexpr 
 	UIntType dim() {
 		if constexpr ((sizeof...(N_nm1))==0)
 			return 1;
@@ -106,7 +118,7 @@ public:
 			return ((sizeof...(N_nm1))+1);
 	}
 	
-	inline static constexpr 
+	static constexpr 
 	ullint card() {
 		if constexpr (dim()==1)
 			return N_n;
@@ -135,24 +147,46 @@ public:
 		"espacio modular ha "
 		"de ser inferior a 256"
 	);
+
+private : 	// recursive instantiatons for get a for loop in compile time
+			// the authentic implementation is in tuple_t.hpp
+
+	template <UIntType Actual,UIntType OnePastLast>
+	using static_decr = 
+		simple_static_for_decr<
+			UIntType,
+			Actual,OnePastLast,
+			modint_t,
+			N_n,N_nm1...
+		>;
 	
-	template <
-		UIntType First,
-		UIntType Actual,
-		UIntType OnePastLast	
-	>
-	using static_for = impl::simple_static_for<UIntType,First,Actual,OnePastLast>;
+	template <UIntType Actual,UIntType OnePastLast>
+	using static_incr = 
+		simple_static_for_incr<
+			UIntType,
+			Actual,OnePastLast,
+			modint_t,
+			N_n,N_nm1...
+		>;
+public:
+
+	template<UIntType Mod> using
+	modint_mod = modint_t<UIntType,Mod>; // igual que imod pero preferible
 	
-	template<UIntType K>
-	using	imod			=	modint_t<UIntType,K>;
-	using	im_N			=	imod<N_n>;
+	template<size_t idx> using
+	modint_idx = modint_mod<mod_idx<idx>()>;
 	
-	using	base_t 			= tuple<imod<N_n>,imod<N_nm1>...>;
-	using	base_head_t 	= tuple<imod<N_n>>;
-	using	base_tail_t 	= tuple<imod<N_nm1>...>;
-	using	base_root_t 	= decltype(root<imod<N_n>,imod<N_nm1>...>(base_t{}));
-	using	base_btail_t 	= decltype(btail<imod<N_n>,imod<N_nm1>...>(base_t{}));
-	using	base_reverse_t 	= decltype(reverse<imod<N_n>,imod<N_nm1>...>(base_t{}));
+	using	im_N			=	modint_idx<0>;
+	
+	using	base_t 			= tuple<modint_mod<N_n>,modint_mod<N_nm1>...>;
+	using	base_head_t 	= tuple<modint_mod<N_n>>;
+	using	base_tail_t 	= tuple<modint_mod<N_nm1>...>;
+	using	base_root_t 	= 
+		decltype(root<modint_mod<N_n>,modint_mod<N_nm1>...>(base_t{}));
+	using	base_btail_t 	= 
+		decltype(btail<modint_mod<N_n>,modint_mod<N_nm1>...>(base_t{}));
+	using	base_reverse_t 	= 
+		decltype(reverse<modint_mod<N_n>,modint_mod<N_nm1>...>(base_t{}));
 	
 	using	elem_t			=	modint_cartprod_t<UIntType,N_n,N_nm1...>;
 	using	elem_head_t		=	modint_cartprod_t<UIntType,N_n>;
@@ -166,231 +200,131 @@ public:
 	/////////////////////////////////////////////////////
 	/// FUNCTIONS FROM MEMBER BASE_T AND ITS SUBTYPES ///
 	/////////////////////////////////////////////////////
-public :
+	
 	template<size_t idx>
-	using
-	modint_idx = modint_t<UIntType,get<idx>(mod_tup())>;
-	
-	template<UIntType Mod>
-	using
-	modint_mod = modint_t<UIntType,Mod>;
-	
-	template<size_t k>
-	inline constexpr
-	UIntType
-	get_int() const {
-		return UIntType(get<k>(elem));
+	constexpr
+	modint_idx<idx>& get_modint() {
+		modint_idx<idx>& result{get<idx>(elem)};
+		return (result);
 	}
 	
-	template<size_t k>
-	inline constexpr
-	modint_idx<k>&
-	get_modint() {
-		return (get<k>(elem));
+	template<size_t idx>
+	constexpr
+	modint_idx<idx> get_modint() const {
+		const modint_idx<idx> result{get<idx>(elem)};
+		return (result);
 	}
-		
-	inline constexpr 
+	
+	template<size_t Idx>
+	constexpr
+	UIntType get_int() const {
+		static_assert(Idx < dim(),"fuera de rango");
+		const modint_idx<Idx> presult{get_modint<Idx>()};
+		const UIntType result{UIntType(presult)};
+		return (result);
+	}
+	
+	constexpr
+	base_t get_base_elem() const {
+		return (elem);
+	}
+	
+	constexpr
+	base_t & get_base_elem() {
+		return (elem);
+	}
+	
+	constexpr 
 	im_N get_head_val() const {
-		return head_value<imod<N_n>,imod<N_nm1>...>(elem);
+		return head_value(elem);
 	}
 	
-	inline constexpr 
+	constexpr 
 	base_head_t get_head() const {
-		return make_tuple(head_value<imod<N_n>,imod<N_nm1>...>(elem));
+		return make_tuple(head_value(elem));
 	}
 	
-	inline constexpr 
+	constexpr 
 	base_tail_t get_tail() const {
-		const base_tail_t result{
-			tail(elem)
-		};
+		const base_tail_t result{tail(elem)};
 		return result;
 	}
-public :
-	inline constexpr
+	
+	constexpr
 	base_root_t get_root() const {
 		const base_root_t result{root(elem)};
 		return result;
 	}
 	
-	inline constexpr
+	constexpr
 	decltype(auto) get_root_val() const {
-		return root_value<imod<N_n>,imod<N_nm1>...>(elem);
+		const auto result{roo_value(elem)};
+		return result;
 	}
 	
-	inline constexpr 
+	constexpr 
 	base_btail_t get_btail() const {
 		const base_btail_t result{btail(elem)};
 		return result;
 	}
 	
-	inline constexpr 
+	constexpr 
 	auto get_reverse() const {
 		const base_reverse_t result{reverse(elem)};
 		return result;
 	}
-private :
-	inline static constexpr
-	im_N
-	g_imN(UIntType k) {
-		return im_N{UIntType(k)}; 
+	
+private : // intern implementations for comfort
+
+	static constexpr
+	im_N g_imN(UIntType k) {
+		const im_N result{UIntType(k)};
+		return result; 
 	}
 	
-	template<UIntType I>
-	inline static constexpr
-	imod<I>
+	template<UIntType idx>
+	static constexpr
+	modint_idx<idx>
 	g_im(UIntType k) {
-		return imod<I>{UIntType(k)};
-	}
-	
-	template<
-		UIntType I,
-		template<typename,UIntType> class Funct_t
-	>
-	inline static constexpr void
-	genimpl_of_impl_impl(
-		Funct_t<base_t,I> funct,
-		base_t & A,
-		const base_t & B)  			{
-			return funct(A,B,I);	}
-	
-	template<
-		UIntType...I,
-		template<typename> typename Funct_t
-	>
-	inline static constexpr void
-	genimpl_of_impl(
-		Funct_t<base_t> funct,
-		base_t & A,
-		const base_t & B,
-		arg_index_sq_t<I...>)									{
-			return (genimpl_of_impl_impl(funct,A,B,I),...) ;	}
-	
-	template<
-		UIntType...I,
-		template<typename> typename Funct_t
-	>
-	inline static constexpr void
-	genimpl_of_impl(
-		Funct_t<base_t> funct,
-		base_t & A,
-		arg_index_sq_t<I...>)								{
-			return (genimpl_of_impl_impl(funct,A,I),...) ;	}
-	
-	inline static constexpr
-	void 
-	DigitIncr(base_t& A,array<bool,dim()> && temp,UIntType I) {
-		if constexpr (I==0) {
-			if (get<0>(A.elem) < g_imN(N_n-1)) {
-				get<0>(A.elem) += g_imN(1);
-				get<1>(temp)	= false;
-			}
-			else {
-				get<0>(A.elem)	+= g_imN(0);
-				get<1>(temp) 	 = true;
-			}
-		}
-		else {
-			if (
-				(get<I>(A) < g_im<I>(get<I>(mod_tup())-1))
-					&&
-				(get<I>(temp))
-			) {
-				get<I>(A) 			+=	g_im<I>(1);
-				get<I+1>(temp)		 =	false;
-			}
-			else if  (
-				(get<I>(A) == g_im<I>(get<I>(mod_tup())-1))
-					&&
-				(get<I>(temp))
-			) {
-				get<I>(A)			=	g_im<I>(0);
-				get<I+1>(temp) 		=	true;
-			}
-			else {
-				get<I+1>(temp)		=	false;
-			}
-		}
-	}
-		
-	inline static constexpr
-	void 
-	DigitDecr(base_t& A,array<bool,dim()> && B,UIntType I) {
-		if constexpr (I==0) {
-			if (get<0>(A) > g_imN(0)) {
-				get<0>(A) -= g_imN(1);
-				get<1>(B) = false;
-			}
-			else {
-				get<0>(A)		+=g_imN(N_n-1);
-				get<1>(B) 	 	 = true;
-			}
-		} else {
-			if (
-				(get<I>(A) > g_im<I>(0))
-					&&
-				(get<I>(B))
-			) {
-				get<I>(A) 		-=	g_im<I>(1);
-				get<I+1>(B)		 =	false;
-			}
-			else if  (
-				(get<I>(A) == g_im<I>(0))
-					&&
-				(get<I>(B))
-			) {
-				get<I>(A)		=	g_im<I>(get<I>(mod_tup())-1);
-				get<I+1>(B) 	=	true;
-			}
-			else {
-				get<I+1>(B)		=	false;
-			}
-		}
+		static_assert(idx<dim(),"fuera de rango");
+		const modint_idx<idx> result{UIntType(k)};
+		return result;
 	}
 	
 	/// BEGIN : UNICO DATO MIEMBRO
 		base_t		elem{};
 	/// END   : UNICO DATO MIEMBRO
-public :	
+	
+public :
+		
 	///////////////////////////
 	/// BASIC CONSTRUCTORS ////
 	///////////////////////////
 	
-	inline constexpr
+	constexpr
 	modint_cartprod_t()=default;
 	
-	inline constexpr
-	modint_cartprod_t(
-		const modint_cartprod_t &
-	)=default;
+	constexpr
+	modint_cartprod_t(const modint_cartprod_t &)=default;
 	
-	inline constexpr
-	modint_cartprod_t(
-		modint_cartprod_t &&
-	)=default;
+	constexpr
+	modint_cartprod_t(modint_cartprod_t &&)=default;
 	
 	/////////////////////////////////
 	/// QUASI BASIC CONSTRUCTORS ////
 	/////////////////////////////////
 	
-	inline constexpr
-	modint_cartprod_t(
-		const base_t & otherbelem
-	) : elem{otherbelem} {}
+	constexpr
+	modint_cartprod_t(const base_t & otherbelem) : elem{otherbelem} {}
 	
-	//inline constexpr
-	//modint_cartprod_t(
-	//	base_t && otherelem
-	//) : elem{otherelem} {}
-	
-	////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////
 	/// modint_cartprod_t FROM THEIR SUB-MEMBER modint_t CONSTRUCTORS ////
-	////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////
 	
-	inline constexpr
+	constexpr
 	modint_cartprod_t(
 		im_N im_n ,
-		imod<N_nm1> ... im_nm1
+		modint_mod<N_nm1> ... im_nm1
 	)
 		: elem{make_tuple(im_n,im_nm1 ...)} {
 		static_assert(
@@ -400,21 +334,23 @@ public :
 		);
 	}
 	
-	/////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
 	/// modint_cartprod_t FROM A TUPLE OF INTEGERS CONSTRUCTORS ////
-	/////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
 	
 	template<typename IntType_n,typename ... IntType_nm1>
-	inline constexpr
+	constexpr
 	modint_cartprod_t(
-		IntType_n 		i_n		,
+		IntType_n 		i_n		 ,
 		IntType_nm1 	... i_nm1
 	) : 
-		elem{make_tuple(
-			im_N{IntType_n(i_n)},
-			imod<N_nm1>{IntType_n(i_nm1)}
-			...
-		)} {
+		elem{
+			make_tuple(
+				modint_mod<N_n>(to_UIntType<IntType_n,UIntType,N_n>(i_n))				,
+				modint_mod<N_nm1>(to_UIntType<IntType_nm1,UIntType,N_nm1>(i_nm1))	...
+			)
+		}
+	{
 		static_assert(
 			sizeof...(IntType_nm1)==sizeof...(N_nm1),
 			"El numero de argumentos enteros de entrada "
@@ -427,46 +363,41 @@ public :
 		);
 	}
 	
-	inline constexpr explicit
-	modint_cartprod_t(
-		const im_N			& in,
-		const base_tail_t	& rnm1
-	) :	elem{tuple_cat(make_tuple(in),rnm1)} {}
+	constexpr explicit
+	modint_cartprod_t(const im_N & in,const base_tail_t	& rnm1) 
+	: elem{tuple_cat(make_tuple(in),rnm1)} 
+	{}
 	
-	inline constexpr explicit
-	modint_cartprod_t(
-		im_N	&&	 in,
-		base_tail_t	&& rnm1
-	) :	elem{
-		tuple_cat(
-			make_tuple(in),
-			rnm1
-		)} {}
+	constexpr explicit
+	modint_cartprod_t(im_N && in,base_tail_t && rnm1) 
+	:	elem{
+			tuple_cat(
+				make_tuple(in),
+				rnm1
+			)
+		} 
+	{}
 	
 	///////////////////////////////////////
 	///		OPERADORES DE ASIGNACION	///
 	///////////////////////////////////////
 	
-	inline constexpr
-	modint_cartprod_t & operator=(
-		modint_cartprod_t &
-	) = default;
+	constexpr
+	modint_cartprod_t & operator=(modint_cartprod_t &) = default;
 	
-	inline constexpr
-	const modint_cartprod_t & operator=(
-		const modint_cartprod_t & arg
-	) {
-		(*this)=arg;
+	constexpr
+	const modint_cartprod_t & operator=(const modint_cartprod_t & arg) {
+		if(this != &arg)
+			elem = arg.elem;
 		return (*this);
 	}
 	
-	inline constexpr
-	modint_cartprod_t & operator=(
-		modint_cartprod_t &&
-	) = default;
+	constexpr
+	modint_cartprod_t & operator=(modint_cartprod_t &&) = default;
 	
 	template<typename UInt_n, typename ... UInt_nm1>
-	inline constexpr const modint_cartprod_t & 
+	constexpr 
+	const modint_cartprod_t & 
 	operator=(const tuple<UInt_n,UInt_nm1...> & arg) {
 		const auto result{
 			build_from_tuple_of_ints<
@@ -476,167 +407,186 @@ public :
 				UInt_n,UInt_nm1...
 			>(arg)
 		};
-		this->elem = result;
+		elem = result;
 		return (*this);
 	}
 	
-	inline constexpr bool 
+	constexpr bool 
 	operator<(const modint_cartprod_t & rhs) const {
 		const auto LHS {get_reverse()};
 		const auto RHS {rhs.get_reverse()};
 		return (LHS<RHS);
 	}
 
-	inline constexpr bool 
+	constexpr bool 
 	operator>(const modint_cartprod_t & rhs) const {
 		const auto LHS {get_reverse()};
 		const auto RHS {rhs.get_reverse()};
 		return (LHS>RHS);
 	}
 	
-	inline constexpr bool 
+	constexpr bool 
 	operator <= (const modint_cartprod_t & rhs) const {
 		const auto LHS {get_reverse()};
 		const auto RHS {rhs.get_reverse()};
 		return (LHS<=RHS);
 	}
 
-	inline constexpr bool
+	constexpr bool
 	operator >= (const modint_cartprod_t & rhs) const {
 		const auto LHS {get_reverse()};
 		const auto RHS {rhs.get_reverse()};
 		return (LHS>=RHS);
 	}
-
-	inline constexpr bool 
+	
+	
+	constexpr bool 
 	operator==(const modint_cartprod_t & rhs) const {
-		return (elem==rhs);
+		return (elem==rhs.elem);
 	}
 
-	inline constexpr bool 
+	constexpr bool 
 	operator!=(const modint_cartprod_t & rhs) const {
-		return (elem!=rhs);
+		return (elem!=rhs.elem);
 	}
+	
 private:	
+	
 	template<UIntType I>
 	inline static constexpr bool
-	is_zero_impl_impl(const & A) {
-		return (get<I>(A)==g_im<I>(0));
+	is_zero_impl_impl(const modint_cartprod_t & A) {
+		constexpr modint_idx<I> zero{UIntType(0)};
+		return (get<I>(A.elem)==zero);
 	}
 	
 	template<UIntType... I>
 	inline static constexpr bool
-	is_zero_impl(const & A,arg_index_sq_t<I...>) {
-		return (is_zero_impl_impl<I>(A)&&...);
-	} 
+	is_zero_impl(const modint_cartprod_t & A,arg_index_sq_t<I...>) {
+		return ((is_zero_impl_impl<I>(A.elem))&&...);
+	}
+ 
 public:	
-	inline constexpr bool
+
+	constexpr bool
 	is_zero_elem() const {
-		return is_zero_impl(elem,ret_index_sq_t{});
+		return is_zero_impl(*this,ret_index_sq_t{});
 	}
+
 private:	
+
 	template<UIntType I>
 	inline static constexpr bool
-	is_unit_impl_impl(const & A) {
-		return (get<I>(A)==g_im<I>(1));
+	is_unit_impl_impl(const modint_cartprod_t & A) {
+		constexpr auto K{get<I>(mod_tup())};
+		return (get<I>(A.elem)==g_im<K>(1));
 	}
 	
 	template<UIntType ... I>
 	inline static constexpr bool
-	is_unit_impl(const & A,arg_index_sq_t<I...>) {
-		return (is_unit_impl_impl<I>(A)&&...);
+	is_unit_impl(const modint_cartprod_t & A,arg_index_sq_t<I...>) {
+		return ((is_unit_impl_impl<I>(A.elem))&&...);
 	} 
+
 public:	
-	inline constexpr bool
+
+	constexpr bool
 	is_unit_elem() const {
-		return is_unit_impl(elem,ret_index_sq_t{});
+		return is_unit_impl(*this,ret_index_sq_t{});
 	}
+
 private:	
+	
 	template<UIntType I>
 	inline static constexpr bool
-	is_max_impl_impl(const base_t & A) {
-		return (get<I>(A)==g_im<I>(get<I>(mod_tup)-1));
+	is_max_impl_impl(const modint_cartprod_t & A) {
+		constexpr auto K{get<I>(mod_tup())};
+		return (get<I>(A.elem)==g_im<K>(K-1));
 	}
 	
 	template<UIntType ... I>
 	inline static constexpr bool
-	is_max_impl(const base_t & A,arg_index_sq_t<I...>) {
-		return ((is_max_impl_impl<I>(A))&&...);
-	} 
-public:	
-	inline constexpr bool
+	is_max_impl(const modint_cartprod_t & A,arg_index_sq_t<I...>) {
+		return ((is_max_impl_impl<I>(A.elem))&&...);
+	}
+ 
+public:
+
+	constexpr bool
 	is_max_elem() const {
-		return is_max_impl(elem,ret_index_sq_t{});
+		return is_max_impl(*this,ret_index_sq_t{});
 	}
 	
-	inline static constexpr
+	static constexpr
 	modint_cartprod_t max_elem() {
-		constexpr
-		modint_cartprod_t result {
-			make_tuple(
-				imod<N_n>{UIntType(N_n-1)},
-				imod<N_nm1>{UIntType(N_nm1-1)}...
-			)
+		constexpr modint_cartprod_t result {
+			make_tuple(	modint_mod<N_n>{UIntType(N_n-1)},
+						modint_mod<N_nm1>{UIntType(N_nm1-1)}...)
 		};
 		return result;
 	}
 	
-	inline static constexpr
+	static constexpr
+	modint_cartprod_t premax_elem() {
+		constexpr modint_cartprod_t result {
+			make_tuple(	modint_mod<N_n>{UIntType(N_n-2_ui8)},
+						modint_mod<N_nm1>{UIntType(N_nm1-1_ui8)}...)
+		};
+		return result;
+	}
+	
+	static constexpr
 	modint_cartprod_t zero_elem() {
-		constexpr
-		modint_cartprod_t result {
+		constexpr modint_cartprod_t result {
 			make_tuple(
-				imod<N_n>{UIntType(0)},
-				imod<N_nm1>{UIntType(0)}...
+				modint_mod<N_n>{UIntType(0)},modint_mod<N_nm1>{UIntType(0)}...
 			)
 		};
 		return result;
 	}
 	
-	inline static constexpr
+	static constexpr
 	modint_cartprod_t unit_elem() {
 		constexpr
 		modint_cartprod_t result {
 			make_tuple(
-				imod<N_n>{UIntType(1)},
-				imod<N_nm1>{UIntType(1)}...
+				modint_mod<N_n>{UIntType(1)},
+				modint_mod<N_nm1>{UIntType(1)}...
 			)
 		};
 		return result;
 	}
 		
-	inline constexpr
+	constexpr
 	modint_cartprod_t next() const {
 		modint_cartprod_t result{*this};
-		array<bool,dim()+1> borrow_tup{false};
-		static_for<0,0,dim()>(DigitIncr,result.elem,borrow_tup);
+		array<bool,dim()+1> carry_tup{};
+		static_incr<0,dim()>::recursive(result.elem,carry_tup);
 		return result;
 	}
 
-	inline constexpr
+	constexpr
 	modint_cartprod_t prev() const {
 		modint_cartprod_t result{*this}; 
-		array<bool,dim()+1> borrow_tup{false};
-		static_for<0,0,dim()>(DigitDecr,result.elem,borrow_tup);
+		array<bool,dim()+1> borrow_tup{};
+		static_decr<0,dim()>::recursive(result.elem,borrow_tup);
 		return result;
 	}
 
-	inline constexpr
-	const modint_cartprod_t & m_next()  { 
-		array<bool,dim()+1> carry_tup{false};
-		static_for<0,0,dim()>(DigitIncr,elem,carry_tup);
-		return (*this);
-	}
-
-	inline constexpr
-	const modint_cartprod_t & m_prev() {
+	constexpr
+	const modint_cartprod_t & m_next()  {
 		array<bool,dim()+1> carry_tup{};
-		static_for<0,0,dim()>(DigitDecr,elem,carry_tup);
+		static_incr<0,dim()>::recursive(elem,carry_tup);
 		return (*this);
 	}
 
-
-	std::string to_string(const std::string & X) const {
+	constexpr
+	const modint_cartprod_t & m_prev() {
+		array<bool,dim()+1> borrow_tup{};
+		static_decr<0,dim()>::recursive(elem,borrow_tup);
+		return (*this);
+	}
+	
+	std::string to_string(const std::string & X="abcdefgh") const {
 		std::string Y = X;
 		const std::string si_n{std::to_string(UIntType(get_head_val()))};
 		std::string letra(1,Y.front());
@@ -665,17 +615,17 @@ public:
 		}
 	}
 	
-private :
+private : // implementation of add (only for intern use)
 	
 	template<UIntType K>
-	static constexpr
+	inline static constexpr
 	void
 	add_impl_impl(base_t & A, const base_t & B) {
 		get<K>(A) += get<K>(B);
 	}
 	
 	template<UIntType ... K>
-	static constexpr
+	inline static constexpr
 	void
 	add_impl(base_t & A, const base_t & B,arg_index_sq_t<K...>) {
 		(add_impl_impl<K>(A,B),...);
@@ -683,7 +633,7 @@ private :
 	
 public:
 	
-	inline constexpr
+	constexpr
 	elem_t operator + (const elem_t & rhs) const {
 		elem_t result{elem};
 		add_impl(
@@ -694,7 +644,7 @@ public:
 		return (result);
 	}
 	
-	inline constexpr
+	constexpr
 	const elem_t & operator += (const elem_t & rhs) {
 		add_impl(
 			elem,
@@ -704,17 +654,17 @@ public:
 		return (*this);
 	}
 	
-private :
+private :  // implementation of substract (only for intern use)
 	
 	template<UIntType K>
-	static constexpr
+	inline static constexpr
 	void
 	substract_impl_impl(base_t & A, const base_t & B) {
 		get<K>(A) -= get<K>(B);
 	}
 	
 	template<UIntType ... K>
-	static constexpr
+	inline static constexpr
 	void
 	substract_impl(base_t & A, const base_t & B,arg_index_sq_t<K...>) {
 		(substract_impl_impl<K>(A,B),...);
@@ -722,7 +672,7 @@ private :
 	
 public:	
 	
-	inline constexpr
+	constexpr
 	elem_t operator - (const elem_t & rhs) const {
 		elem_t result{elem};
 		substract_impl(
@@ -733,7 +683,7 @@ public:
 		return (result);
 	}
 	
-	inline constexpr
+	constexpr
 	const elem_t & operator -= (const elem_t & rhs) {
 		substract_impl(
 			elem,
@@ -743,17 +693,17 @@ public:
 		return (*this);
 	}
 	
-private :
+private :  // implementation of unary minus (only for intern use)
 	
 	template<UIntType K>
-	static constexpr
+	inline static constexpr
 	void
 	minus_impl_impl(base_t & A) {
 		get<K>(A).mCB();
 	}
 	
 	template<UIntType ... K>
-	static constexpr
+	inline static constexpr
 	void
 	minus_impl(base_t & A,arg_index_sq_t<K...>) {
 		(minus_impl_impl<K>(A),...);
@@ -761,7 +711,7 @@ private :
 	
 public:
 	
-	inline constexpr
+	constexpr
 	elem_t operator - () const {
 		elem_t result{elem};
 		minus_impl(
@@ -770,18 +720,18 @@ public:
 		);
 		return (result);
 	}
-
-private :
+	
+private : // implementation of unary complement to the Mod-1 (only for intern use)
 	
 	template<UIntType K>
-	static constexpr
+	inline static constexpr
 	void
 	tilde_impl_impl(base_t & A) {
 		get<K>(A).mCBm1();
 	}
 	
 	template<UIntType ... K>
-	static constexpr
+	inline static constexpr
 	void
 	tilde_impl(base_t & A,arg_index_sq_t<K...>) {
 		(tilde_impl_impl<K>(A),...);
@@ -789,7 +739,7 @@ private :
 	
 public:
 
-	inline constexpr
+	constexpr
 	elem_t operator ~() const {
 		elem_t result{elem};
 		tilde_impl(
@@ -799,24 +749,25 @@ public:
 		return (result);
 	}
 	
-private :
+private :  // implementation of unary complement to the Mod (only for intern use)
 	
 	template<UIntType K>
-	static constexpr
+	inline static constexpr
 	void
 	exclam_impl_impl(base_t & A) {
 		get<K>(A).mCB();
 	}
 	
 	template<UIntType ... K>
-	static constexpr
+	inline static constexpr
 	void
 	exclam_impl(base_t & A,arg_index_sq_t<K...>) {
 		(exclam_impl_impl<K>(A),...);
 	}
 	
 public:
-	inline constexpr
+
+	constexpr
 	const elem_t & operator !() {
 		exclam_impl(
 			elem,
@@ -825,17 +776,17 @@ public:
 		return (*this);
 	}
 	
-private :
+private : // implementation of binary multiplication (only for intern use)
 	
 	template<UIntType K>
-	static constexpr
+	inline static constexpr
 	void
 	mult_impl_impl(base_t & A,const base_t & B) {
 		get<K>(A)*=get<K>(B);
 	}
 	
 	template<UIntType ... K>
-	static constexpr
+	inline static constexpr
 	void
 	mult_impl(base_t & A,const base_t & B,arg_index_sq_t<K...>) {
 		(mult_impl_impl<K>(A,B),...);
@@ -843,7 +794,7 @@ private :
 	
 public:
 	
-	inline constexpr
+	constexpr
 	elem_t operator * (const elem_t & rhs) const {
 		elem_t result{elem};
 		mult_impl(
@@ -854,7 +805,7 @@ public:
 		return (result);
 	}
 	
-	inline constexpr
+	constexpr
 	const elem_t & operator *= (const elem_t & rhs) {
 		mult_impl(
 			elem,
@@ -864,17 +815,17 @@ public:
 		return (*this);
 	}
 
-private :
+private : // impl. of unary multiplicative inversion (only for intern use)
 	
 	template<UIntType K>
-	static constexpr
+	inline static constexpr
 	void
 	inv_impl_impl(base_t & A) {
 		get<K>(A).invert();
 	}
 	
 	template<UIntType ... K>
-	static constexpr
+	inline static constexpr
 	void
 	inv_impl(base_t & A,arg_index_sq_t<K...>) {
 		(inv_impl_impl<K>(A),...);
@@ -882,7 +833,7 @@ private :
 	
 public:
 	
-	inline constexpr
+	constexpr
 	elem_t inv() const {
 		elem_t result{*this};
 		inv_impl(
@@ -892,7 +843,7 @@ public:
 		return (result);
 	}
 	
-	inline constexpr
+	constexpr
 	const elem_t & invert() {
 		inv_impl(
 			elem,
@@ -900,9 +851,6 @@ public:
 		);
 		return (*this);
 	}
-	
-	inline constexpr
-	base_t to_base_t() {return elem;}
 };
 
 /////////////////////////////////////////////////////////
@@ -910,14 +858,18 @@ public:
 /////////////////////////////////////////////////////////
 
 template<typename UIntType, UIntType ... Ps,UIntType ... Qs>
-inline constexpr auto
+inline constexpr 
+modint_cartprod_t<UIntType,Ps...,Qs...>
 concat(
 	const modint_cartprod_t<UIntType,Ps...> & arg_P,
 	const modint_cartprod_t<UIntType,Qs...> & arg_Q
-)->modint_cartprod_t<UIntType,Ps...,Qs...>
+)
 {
-	auto preresult{tuple_cat(arg_P.to_base_t(),arg_Q.to_base_t())};
-	modint_cartprod_t<UIntType,Ps...,Qs...> result{preresult};
+	using base_t = tuple<modint_cartprod_t<UIntType,Ps...>,modint_cartprod_t<UIntType,Qs...>>;
+	const modint_cartprod_t<UIntType,Ps...> proj_0{arg_P.to_base_t()};
+	const modint_cartprod_t<UIntType,Qs...> proj_1{arg_Q.to_base_t()};
+	const base_t preresult{tuple_cat(proj_0,proj_1)};
+	const modint_cartprod_t<UIntType,Ps...,Qs...> result{preresult};
 	return result; 
 }
 
@@ -978,10 +930,10 @@ public:
 	inline static constexpr 
 	tuple<UIntType> mod_tup() {return make_tuple(N_n);} 
 	
-	template<size_t k>
+	template<size_t Idx>
 	inline static constexpr 
-	UIntType get_mod_tup() {
-		return get<k>(mod_tup());
+	UIntType mod_idx() {
+		return get<Idx>(mod_tup());
 	} 
 	
 	inline static constexpr 
@@ -1049,30 +1001,42 @@ public :
 	template<UIntType Mod>
 	using
 	modint_mod = modint_t<UIntType,Mod>;
-
-	inline constexpr 
+	
+	constexpr
+	const base_t & get_base_elem() const {
+		const auto result{elem};
+		return elem;
+	}
+	
+	constexpr
+	base_t & get_base_elem() {
+		const auto result{elem};
+		return elem;
+	}
+	
+	constexpr 
 	im_N get_head_val() const {
 		return head_value<im_N>(elem);
 	}
 	
-	inline constexpr 
+	constexpr 
 	base_head_t get_head() const {
 		return make_tuple(head_value<im_N>(elem));
 	}
 	
 public :
-	inline constexpr
+	constexpr
 	base_root_t get_root() const {
 		const base_root_t result{root(elem)};
 		return result;
 	}
 	
-	inline constexpr
+	constexpr
 	decltype(auto) get_root_val() const {
 		return root_value<im_N>(elem);
 	}
 		
-	inline constexpr 
+	constexpr 
 	auto get_reverse() const {
 		const base_reverse_t result{reverse(elem)};
 		return result;
@@ -1090,197 +1054,187 @@ private :
 		base_t		elem{};
 	/// END   : UNICO DATO MIEMBRO
 public :
-	template<size_t k>
-	inline constexpr
-	UIntType
-	get_int() const {
-		return UIntType(get<k>(elem));
-	}
 	
-	template<UIntType k>
-	inline constexpr
-	modint_t<UIntType,get_mod_tup<k>()> &
+	template<UIntType Idx>
+	constexpr
+	modint_t<UIntType,mod_idx<Idx>()> &
 	get_modint() {
-		return (get<k>(elem));
+		return (get<Idx>(elem));
 	}
 	
+	template<UIntType Idx>
+	constexpr
+	modint_t<UIntType,mod_idx<Idx>()>	
+	get_modint() const {
+		return (get<Idx>(elem));
+	}
+	
+	template<size_t Idx>
+	constexpr
+	UIntType get_int() const {
+		const im_N presult{get_modint<Idx>()};
+		const UIntType result{UIntType(presult)};
+		return UIntType(get<Idx>(elem));
+	}
 	
 	///////////////////////////
 	/// BASIC CONSTRUCTORS ////
 	///////////////////////////
 	
-	inline constexpr
+	constexpr
 	modint_cartprod_t()=default;
 	
-	inline constexpr
-	modint_cartprod_t(
-		const modint_cartprod_t &
-	)=default;
+	constexpr
+	modint_cartprod_t(const modint_cartprod_t &)=default;
 	
-	inline constexpr
-	modint_cartprod_t(
-		modint_cartprod_t &&
-	)=default;
+	constexpr
+	modint_cartprod_t(modint_cartprod_t &&)=default;
 	
 	/////////////////////////////////
 	/// QUASI BASIC CONSTRUCTORS ////
 	/////////////////////////////////
 	
-	inline constexpr
-	modint_cartprod_t(
-		const base_t & otherbelem
-	) : elem{otherbelem} {}
-	
-	//inline constexpr
-	//modint_cartprod_t(
-	//	base_t && otherelem
-	//) : elem{otherelem} {}
+	constexpr
+	modint_cartprod_t(const base_t & otherbelem) 
+	: elem{otherbelem} {}
 	
 	////////////////////////////////////////////////////////////////////////
 	/// modint_cartprod_t FROM THEIR SUB-MEMBER modint_t CONSTRUCTORS ////
 	////////////////////////////////////////////////////////////////////////
 	
-	inline constexpr
-	modint_cartprod_t(
-		im_N im_n
-	)
-		: elem{make_tuple(im_n)} {}
+	constexpr
+	modint_cartprod_t(im_N im_n)
+		: elem{make_tuple(im_n)} 
+	{}
 	
 	/////////////////////////////////////////////////////////////////
 	/// modint_cartprod_t FROM A TUPLE OF INTEGERS CONSTRUCTORS ////
 	/////////////////////////////////////////////////////////////////
 	
-	inline constexpr
-	modint_cartprod_t(
-		UIntType 		i_n
-	) : 
-		elem{make_tuple(g_imN(i_n))} 
+	constexpr
+	modint_cartprod_t(UIntType i_n) 
+		: elem{make_tuple(g_imN(i_n))} 
 	{}
 	
 	///////////////////////////////////////
 	///		OPERADORES DE ASIGNACION	///
 	///////////////////////////////////////
 	
-	inline constexpr
-	modint_cartprod_t & operator=(
-		modint_cartprod_t &
-	) = default;
+	constexpr
+	modint_cartprod_t & operator=(modint_cartprod_t &) = default;
 	
-	inline constexpr
-	const modint_cartprod_t & operator=(
-		const modint_cartprod_t & arg
-	) {
-		elem = arg.elem;
+	constexpr
+	const modint_cartprod_t & operator=(const modint_cartprod_t & arg) {
+		if (this != &arg)
+			elem = arg.elem;
 		return (*this);
 	}
 	
-	inline constexpr
-	modint_cartprod_t & operator=(
-		modint_cartprod_t &&
-	) = default;
+	constexpr
+	modint_cartprod_t & operator=(modint_cartprod_t &&) = default;
 	
-	inline constexpr
-	const modint_cartprod_t & operator= (
-		const base_t & arg
-	) {
+	constexpr
+	const modint_cartprod_t & operator= (const base_t & arg) {
+		if (&(this->elem) != &arg)
 		elem = arg;
 		return (*this);
 	}
 	
 	template<typename UInt_n>
-	inline constexpr const modint_cartprod_t & 
+	constexpr 
+	const modint_cartprod_t & 
 	operator=(const tuple<UInt_n> & arg) {
 		elem = make_tuple(g_imN(get<0>(arg)));
 		return (*this);
 	}
 	
-	inline constexpr bool 
+	constexpr bool 
 	operator<(const modint_cartprod_t & rhs) const {
 		return (elem<rhs.elem);
 	}
 
-	inline constexpr bool 
+	constexpr bool 
 	operator>(const modint_cartprod_t & rhs) const {
 		return (elem>rhs.elem);
 	}
 	
-	inline constexpr bool 
+	constexpr bool 
 	operator <= (const modint_cartprod_t & rhs) const {
 		return (elem<=rhs.elem);
 	}
 
-	inline constexpr bool
+	constexpr bool
 	operator >= (const modint_cartprod_t & rhs) const {
 		return (elem>=rhs.elem);
 	}
 
-	inline constexpr bool 
+	constexpr bool 
 	operator==(const modint_cartprod_t & rhs) const {
 		return (elem==rhs.elem);
 	}
 
-	inline constexpr bool 
+	constexpr bool 
 	operator!=(const modint_cartprod_t & rhs) const {
 		return (elem!=rhs.elem);
 	}
 
-	inline constexpr bool
+	constexpr bool
 	is_zero_elem() const {
-		return (std::get<0>(elem)==g_imN(0));
+		return (get<0>(elem)==g_imN(0));
 	}
 	
-	inline constexpr bool
+	constexpr bool
 	is_unit_elem() const {
 		return (get<0>(elem)==g_imN(1));
 	}
 
-	inline constexpr bool
+	constexpr bool
 	is_max_elem() const {
 		return (get<0>(elem)==g_imN(N_n-1));
 	}
 	
-	inline static constexpr
+	static constexpr
 	modint_cartprod_t max_elem() {
 		constexpr
 		modint_cartprod_t result{make_tuple(g_imN(N_n-1))};
 		return result;
 	}
 	
-	inline static constexpr
+	static constexpr
 	modint_cartprod_t zero_elem() {
 		constexpr
 		modint_cartprod_t result{make_tuple(g_imN(0))};
 		return result;
 	}
 	
-	inline static constexpr
+	static constexpr
 	modint_cartprod_t unit_elem() {
 		constexpr
 		modint_cartprod_t result{make_tuple(g_imN(1))};
 		return result;
 	}
 		
-	inline constexpr
+	constexpr
 	modint_cartprod_t next() const {
 		modint_cartprod_t result{*this};
 		++get<0>(result.elem);
 		return result;
 	}
 
-	inline constexpr
+	constexpr
 	modint_cartprod_t prev() const {
 		modint_cartprod_t result{*this}; 
 		--get<0>(result.elem);
 		return result;
 	}
 
-	inline constexpr
+	constexpr
 	const modint_cartprod_t & m_next()  { 
 		++get<0>(elem);
 		return (*this);
 	}
 
-	inline constexpr
+	constexpr
 	const modint_cartprod_t & m_prev() {
 		--get<0>(elem);
 		return (*this);
@@ -1306,81 +1260,79 @@ public :
 			
 public :
 	
-	inline constexpr
+	constexpr
 	elem_t operator + (const elem_t & rhs) const {
 		const elem_t result{get_head_val()+rhs.get_head_val()};
 		return (result);
 	}
 	
-	inline constexpr
+	constexpr
 	const elem_t & operator += (const elem_t & rhs) {
 		get<0>(elem)+=rhs.get_head_val();
 		return (*this);
 	}
 	
-	inline constexpr
+	constexpr
 	elem_t operator - (const elem_t & rhs) const {
 		const elem_t result{get_head_val()-rhs.get_head_val()};
 		return (result);
 	}
 	
-	inline constexpr
+	constexpr
 	const elem_t & operator -= (const elem_t & rhs) {
 		get<0>(elem)-=rhs.get_head_val();
 		return (*this);
 	}
 
-	inline constexpr
+	constexpr
 	elem_t operator - () const {
 		base_t result{elem};
 		get<0>(result).mCB();
 		return (result);
 	}
 	
-	inline constexpr
+	constexpr
 	elem_t operator ~() const {
 		base_t result{elem};
 		get<0>(result).mCBm1();
 		return (result);
 	}
 	
-	inline constexpr
+	constexpr
 	const elem_t & operator !() {
 		get<0>(elem).mCB();
 		return (*this);
 	}
 	
-	inline constexpr
+	constexpr
 	elem_t operator * (const elem_t & rhs) const {
 		elem_t result{elem};
 		get<0>(result.elem)*=get<0>(rhs.elem);
 		return result;
 	}
 	
-	inline constexpr
+	constexpr
 	const elem_t & operator *= (const elem_t & rhs) const {
 		get<0>(elem)*=get<0>(rhs.elem);
 		return (*this);
 	}
 	
-	inline constexpr
+	constexpr
 	elem_t inv() const {
 		elem_t result{elem};
 		get<0>(result.elem).invert();
 		return result;
 	}
 	
-	inline constexpr
+	constexpr
 	const elem_t & invert() {
 		get<0>(elem).invert();
 		return (*this);
 	}
-	
-	inline constexpr
-	base_t & to_base_t() {return (this->elem);}
 };
 
 template<typename IntType,typename UIntType,UIntType N_n>
+constexpr
 modint_cartprod_t<UIntType,N_n>
 operator * (IntType lhs,const modint_cartprod_t<UIntType,N_n> & rhs) {
 	modint_cartprod_t<UIntType,N_n> LHS{
@@ -1391,6 +1343,7 @@ operator * (IntType lhs,const modint_cartprod_t<UIntType,N_n> & rhs) {
 }
 
 template<typename IntType,typename UIntType,UIntType N_n>
+constexpr
 modint_cartprod_t<UIntType,N_n>
 operator * (const modint_cartprod_t<UIntType,N_n> & lhs,IntType rhs) {
 	modint_cartprod_t<UIntType,N_n> RHS{
@@ -1401,6 +1354,7 @@ operator * (const modint_cartprod_t<UIntType,N_n> & lhs,IntType rhs) {
 }
 
 template<typename IntType,typename UIntType,UIntType N_n>
+constexpr
 const modint_cartprod_t<UIntType,N_n> &
 operator *= (modint_cartprod_t<UIntType,N_n> & lhs,IntType rhs) {
 	modint_cartprod_t<UIntType,N_n> RHS{

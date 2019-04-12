@@ -47,10 +47,10 @@ struct binop_t{
 	using modint_mod = modint_t<UIntType,k>;
 	template<size_t K>
 	using modint_idx = modint_t<UIntType,get<K>(modint_cartprod_t::mod_tup())>;
-	inline static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
-	inline static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
-	inline static constexpr UIntType dim() {return modint_cartprod_t::dim();}
-	inline static constexpr LUIntType card() {return modint_cartprod_t::card();}
+	static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
+	static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
+	static constexpr UIntType dim() {return modint_cartprod_t::dim();}
+	static constexpr LUIntType card() {return modint_cartprod_t::card();}
 	
 };
 
@@ -66,10 +66,10 @@ struct binop_t<group_name::C,UIntType,N>{
 	using modint_mod = modint_t<UIntType,k>;
 	template<size_t K>
 	using modint_idx = modint_t<UIntType,get<K>(modint_cartprod_t::mod_tup())>;
-	inline static constexpr UIntType max_mod() {return N;}
-	inline static constexpr UIntType min_mod() {return N;}
-	inline static constexpr UIntType dim() {return 1;}
-	inline static constexpr LUIntType card() {return N;}
+	static constexpr UIntType max_mod() {return N;}
+	static constexpr UIntType min_mod() {return N;}
+	static constexpr UIntType dim() {return 1;}
+	static constexpr LUIntType card() {return N;}
 	
 	static constexpr
 		modint_cartprod_t direct_product(
@@ -95,24 +95,25 @@ struct binop_t<group_name::C,UIntType,N>{
 		)  {
 		return direct_product(a,b);
 	}
+	
+	constexpr
+	modint_cartprod_t operator()(modint_cartprod_t lhs,modint_cartprod_t rhs) const {
+		return gr_bop(lhs,rhs);
+	}
 };
 
-template<typename UIntType,UIntType N2,UIntType N1>
-struct binop_t<group_name::PD_Cyc,UIntType,N2,N1>{
+template<typename UIntType,UIntType N2,UIntType ... N1>
+struct binop_t<group_name::PD_Cyc,UIntType,N2,N1...>{
 	using type = binop_t;
 	using SIntType = signed_for_unsigned_t<UIntType>;
 	using LUIntType = next_int_t<unsigned_for_signed_t<SIntType>>;
 	using UIntType_pair = Ints_pair<UIntType>;
-	using modint_cartprod_t = modint_cartprod_t<UIntType,N2,N1>;///!!!
+	using modint_cartprod_t = modint_cartprod_t<UIntType,N2,N1...>;///!!!
 	using base_t = typename modint_cartprod_t::base_t;
-	template<UIntType k>
-	using modint_mod = modint_t<UIntType,k>;
-	template<size_t K>
-	using modint_idx = modint_t<UIntType,get<K>(modint_cartprod_t::mod_tup())>;
-	inline static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
-	inline static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
-	inline static constexpr UIntType dim() {return modint_cartprod_t::dim();}
-	inline static constexpr LUIntType card() {return modint_cartprod_t::card();}
+	static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
+	static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
+	static constexpr UIntType dim() {return modint_cartprod_t::dim();}
+	static constexpr LUIntType card() {return modint_cartprod_t::card();}
 	
 	static constexpr
 		modint_cartprod_t direct_product(
@@ -141,22 +142,22 @@ struct binop_t<group_name::PD_Cyc,UIntType,N2,N1>{
 };
 
 template<>
-struct binop_t<group_name::Q,uint,2_u8,4_u8>{
+struct binop_t<group_name::Q,uint,2_ui8,4_ui8>{
 	using type = binop_t;
 	using UIntType = uint;
 	using SIntType = signed_for_unsigned_t<uint>;
 	using LUIntType = next_int_t<unsigned_for_signed_t<SIntType>>;
 	using UIntType_pair = Ints_pair<UIntType>;;
-	using modint_cartprod_t = modint_cartprod_t<UIntType,2_u8,4_u8>;///!!!
+	using modint_cartprod_t = modint_cartprod_t<UIntType,2_ui8,4_ui8>;///!!!
 	using base_t = typename modint_cartprod_t::base_t;
 	template<UIntType k>
 	using modint_mod = modint_t<UIntType,k>;
 	template<size_t K>
 	using modint_idx = modint_t<UIntType,get<K>(modint_cartprod_t::mod_tup())>;
-	inline static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
-	inline static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
-	inline static constexpr UIntType dim() {return modint_cartprod_t::dim();}
-	inline static constexpr LUIntType card() {return modint_cartprod_t::card();}
+	static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
+	static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
+	static constexpr UIntType dim() {return modint_cartprod_t::dim();}
+	static constexpr LUIntType card() {return modint_cartprod_t::card();}
 
 	static constexpr
 		modint_cartprod_t Q_product(
@@ -190,7 +191,7 @@ struct binop_t<group_name::Q,uint,2_u8,4_u8>{
 		}
 	}
 	
-	inline static constexpr
+	static constexpr
 	modint_cartprod_t 
 	direct_product(
 		modint_cartprod_t a, modint_cartprod_t b
@@ -200,7 +201,7 @@ struct binop_t<group_name::Q,uint,2_u8,4_u8>{
 		return result;
 	}
 	
-	inline static constexpr
+	static constexpr
 	modint_cartprod_t gr_bop(
 		modint_cartprod_t a,
 		modint_cartprod_t b
@@ -216,32 +217,37 @@ struct binop_t<group_name::Q,uint,2_u8,4_u8>{
 		)  {
 		return direct_product(a,b);
 	}
+	
+	constexpr
+	modint_cartprod_t operator()(modint_cartprod_t lhs,modint_cartprod_t rhs) const {
+		return gr_bop(lhs,rhs);
+	}
 };
 
 template<>
-struct binop_t<group_name::C3__C4,uint,4_u8,3_u8> {
+struct binop_t<group_name::C3__C4,uint,4_ui8,3_ui8> {
 	using type = binop_t;
 	using UIntType = uint;
 	using SIntType = signed_for_unsigned_t<UIntType>;
 	using LUIntType = next_int_t<unsigned_for_signed_t<SIntType>>;
 	using UIntType_pair = Ints_pair<UIntType>;
-	using modint_cartprod_t = modint_cartprod_t<UIntType,3_u8,4_u8>;
+	using modint_cartprod_t = modint_cartprod_t<UIntType,3_ui8,4_ui8>;
 	using base_t = typename modint_cartprod_t::base_t;
-	template<UIntType k>
-	using modint_mod = modint_t<UIntType,k>;
-	template<size_t K>
-	using modint_idx = modint_t<UIntType,get<K>(modint_cartprod_t::mod_tup())>;
-	inline static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
-	inline static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
-	inline static constexpr UIntType dim() {return modint_cartprod_t::dim();}
-	inline static constexpr LUIntType card() {return modint_cartprod_t::card();}
+	template<UIntType kmod>
+	using modint_mod = modint_t<UIntType,kmod>;
+	template<size_t Idx>
+	using modint_idx = modint_cartprod_t::modint_idx<Idx>;
+	static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
+	static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
+	static constexpr UIntType dim() {return modint_cartprod_t::dim();}
+	static constexpr LUIntType card() {return modint_cartprod_t::card();}
 
 
 	static constexpr
-		modint_cartprod_t C3__C4_product(
-			modint_cartprod_t IJ,
-			modint_cartprod_t KM
-		) {
+	modint_cartprod_t C3__C4_product(
+		modint_cartprod_t IJ,
+		modint_cartprod_t KM
+	) {
 		UIntType k{KM.get_int<0>()};
 		UIntType j{IJ.get_int<1>()};
 		modint_cartprod_t resultado{IJ+KM};
@@ -251,7 +257,7 @@ struct binop_t<group_name::C3__C4,uint,4_u8,3_u8> {
 		return resultado;
 	}
 	
-	inline static constexpr 
+	static constexpr 
 	modint_cartprod_t 
 	direct_product(
 		modint_cartprod_t a, modint_cartprod_t b
@@ -274,6 +280,11 @@ struct binop_t<group_name::C3__C4,uint,4_u8,3_u8> {
 			modint_cartprod_t b
 		) {
 		return C3__C4_product(a,b);
+	}
+	
+	constexpr
+	modint_cartprod_t operator()(modint_cartprod_t lhs,modint_cartprod_t rhs) const {
+		return gr_bop(lhs,rhs);
 	}
 };
 
@@ -319,31 +330,36 @@ struct binop_t<group_name::PD_Cyc,uint,N3,N2,N1>{
 		) {
 		return direct_product(a,b);
 	}
+	
+	constexpr
+	modint_cartprod_t operator()(modint_cartprod_t lhs,modint_cartprod_t rhs) const {
+		return gr_bop(lhs,rhs);
+	}
 };
 
 template<>
-struct binop_t<group_name::C3__C2_2,uint,2_u8,2_u8,3_u8> {
+struct binop_t<group_name::C3__C2_2,uint,2_ui8,2_ui8,3_ui8> {
 	using type = binop_t;
 	using UIntType = uint;
 	using SIntType = signed_for_unsigned_t<UIntType>;
 	using LUIntType = next_int_t<unsigned_for_signed_t<SIntType>>;
 	using UIntType_pair = Ints_pair<UIntType>;
-	using modint_cartprod_t = modint_cartprod_t<UIntType,2_u8,2_u8,3_u8>;
+	using modint_cartprod_t = modint_cartprod_t<UIntType,2_ui8,2_ui8,3_ui8>;
 	using base_t = typename modint_cartprod_t::base_t;
 	template<UIntType k>
 	using modint_mod = modint_t<UIntType,k>;
 	template<size_t K>
 	using modint_idx = modint_t<UIntType,get<K>(modint_cartprod_t::mod_tup())>;
-	inline static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
-	inline static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
-	inline static constexpr UIntType dim() {return modint_cartprod_t::dim();}
-	inline static constexpr LUIntType card() {return modint_cartprod_t::card();}
+	static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
+	static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
+	static constexpr UIntType dim() {return modint_cartprod_t::dim();}
+	static constexpr LUIntType card() {return modint_cartprod_t::card();}
 	
 	static constexpr
-		modint_cartprod_t C3__C2_2_product(
-			modint_cartprod_t IJK,
-			modint_cartprod_t LMN
-		) {
+	modint_cartprod_t C3__C2_2_product(
+		modint_cartprod_t IJK,
+		modint_cartprod_t LMN
+	) {
 		UIntType i{IJK.get_int<0>()};
 		UIntType j{IJK.get_int<1>()};
 		UIntType k{IJK.get_int<2>()};
@@ -374,44 +390,47 @@ struct binop_t<group_name::C3__C2_2,uint,2_u8,2_u8,3_u8> {
 
 	static constexpr
 	modint_cartprod_t semi_direct_product(
-						modint_cartprod_t a,
-						modint_cartprod_t b) {
+		modint_cartprod_t a,
+		modint_cartprod_t b) {
 		return direct_product(a,b);
 	}
 
 	static constexpr
-		modint_cartprod_t gr_bop(
-			modint_cartprod_t a,
-			modint_cartprod_t b
-		) {
+	modint_cartprod_t gr_bop(
+		modint_cartprod_t a,
+		modint_cartprod_t b
+	) {
 		return C3__C2_2_product(a,b);
+	}
+	
+	constexpr
+	modint_cartprod_t operator()(modint_cartprod_t lhs,modint_cartprod_t rhs) const {
+		return gr_bop(lhs,rhs);
 	}
 };
 
 
 template<>
-struct binop_t<group_name::C2_2__C3,uint,2_u8,2_u8,3_u8> {
+struct binop_t<group_name::C2_2__C3,uint,2_ui8,2_ui8,3_ui8> {
 	using type = binop_t;
 	using UIntType = uint;
 	using SIntType = signed_for_unsigned_t<UIntType>;
 	using LUIntType = next_int_t<unsigned_for_signed_t<SIntType>>;
 	using UIntType_pair = Ints_pair<UIntType>;
-	using modint_cartprod_t = modint_cartprod_t<UIntType,2_u8,2_u8,3_u8>;
+	using modint_cartprod_t = modint_cartprod_t<UIntType,2_ui8,2_ui8,3_ui8>;
 	using base_t = typename modint_cartprod_t::base_t;
 	template<UIntType k>
 	using modint_mod = modint_t<UIntType,k>;
 	template<size_t K>
 	using modint_idx = modint_t<UIntType,get<K>(modint_cartprod_t::mod_tup())>;
-	inline static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
-	inline static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
-	inline static constexpr UIntType dim() {return modint_cartprod_t::dim();}
-	inline static constexpr LUIntType card() {return modint_cartprod_t::card();}
+	static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
+	static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
+	static constexpr UIntType dim() {return modint_cartprod_t::dim();}
+	static constexpr LUIntType card() {return modint_cartprod_t::card();}
 	
 	static constexpr
 	modint_cartprod_t 
-	phi_action(
-		modint_cartprod_t IJK,modint_cartprod_t LMN
-	) {
+	phi_action(modint_cartprod_t IJK,modint_cartprod_t LMN) {
 		const UIntType k{IJK.get_int<2>()};
 		const UIntType l{LMN.get_int<0>()};
 		const UIntType m{LMN.get_int<1>()};
@@ -438,9 +457,7 @@ struct binop_t<group_name::C2_2__C3,uint,2_u8,2_u8,3_u8> {
 	}
 
 	static constexpr
-	modint_cartprod_t zeta_action(
-		modint_cartprod_t IJK,modint_cartprod_t LMN
-	) {
+	modint_cartprod_t zeta_action(modint_cartprod_t IJK,modint_cartprod_t LMN) {
 		const UIntType i{IJK.get_int<0>()};
 		const UIntType j{IJK.get_int<1>()};
 		const UIntType k{IJK.get_int<2>()};
@@ -475,9 +492,7 @@ struct binop_t<group_name::C2_2__C3,uint,2_u8,2_u8,3_u8> {
 	}
 
 	static constexpr
-	modint_cartprod_t C2_2__C3_product(
-		modint_cartprod_t IJK,modint_cartprod_t LMN
-	) {
+	modint_cartprod_t C2_2__C3_product(modint_cartprod_t IJK,modint_cartprod_t LMN) {
 		const UIntType k{IJK.get_int<2>()};
 		
 		const UIntType l{LMN.get_int<0>()};
@@ -494,59 +509,58 @@ struct binop_t<group_name::C2_2__C3,uint,2_u8,2_u8,3_u8> {
 	}
 
 	static constexpr
-	modint_cartprod_t direct_product(
-		modint_cartprod_t a,modint_cartprod_t b
-	) {
+	modint_cartprod_t direct_product(modint_cartprod_t a,modint_cartprod_t b) {
 		const modint_cartprod_t result {a+b};
 		return result;
 	}
 	
 	static constexpr
-	modint_cartprod_t semi_direct_product(
-		modint_cartprod_t a,modint_cartprod_t b
-	) {
+	modint_cartprod_t semi_direct_product(modint_cartprod_t a,modint_cartprod_t b) {
 		return direct_product(a,b);
 	}
 
 	static constexpr
-	modint_cartprod_t gr_bop(
-		modint_cartprod_t a,
-		modint_cartprod_t b
-	) {
+	modint_cartprod_t gr_bop(modint_cartprod_t a,modint_cartprod_t b) {
 		return C2_2__C3_product(a,b);
 	}
+	constexpr
+	modint_cartprod_t operator()(modint_cartprod_t lhs,modint_cartprod_t rhs) const {
+		return gr_bop(lhs,rhs);
+	}
 };
-
+/// AQUI EMPIEZA A DAR ERRORES
 template<uint N>
-struct binop_t<group_name::Dih,uint,2_u8,N> {
+struct binop_t<group_name::Dih,uint,2_ui8,N> {
 	using type = binop_t;
 	using UIntType = uint;
 	using SIntType = signed_for_unsigned_t<UIntType>;
 	using LUIntType = next_int_t<unsigned_for_signed_t<SIntType>>;
 	using UIntType_pair = Ints_pair<UIntType>;
-	using modint_cartprod_t = modint_cartprod_t<UIntType,2_u8,N>;
+	using modint_cartprod_t = modint_cartprod_t<UIntType,2_ui8,N>;
 	using base_t = typename modint_cartprod_t::base_t;
-	template<UIntType k>
-	using modint_mod = modint_t<UIntType,k>;
-	template<size_t K>
-	using modint_idx = modint_t<UIntType,get<K>(modint_cartprod_t::mod_tup())>;
-	inline static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
-	inline static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
-	inline static constexpr UIntType dim() {return modint_cartprod_t::dim();}
-	inline static constexpr LUIntType card() {return modint_cartprod_t::card();}
+	template<UIntType Idx>
+	static constexpr
+	UIntType mod_idx() { return (get<Idx>( modint_cartprod_t::mod_tup() ));}
+	template<UIntType KMod>
+	using modint_mod = modint_t<UIntType,KMod>;
+	template<size_t Idx>
+	using modint_idx = modint_mod<mod_idx<Idx>()>;
+	static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
+	static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
+	static constexpr UIntType dim()     {return modint_cartprod_t::dim();}
+	static constexpr LUIntType card()   {return modint_cartprod_t::card();}
 	
 	
 	static constexpr
-	modint_cartprod_t Dih_product (modint_cartprod_t a,modint_cartprod_t b) 
-	{
+	modint_cartprod_t Dih_product( modint_cartprod_t lhs , modint_cartprod_t rhs ) {
 		
-		UIntType i = a.get_int<0>();/// Module 2
-		const UIntType k {a.get_int<1>()};/// Module N
+		const auto i{ UIntType(get<0>(lhs)) }; // Module 2
+		const auto k{ UIntType(get<1>(lhs)) }; // Module N
 		
-		auto j {b.get_int<0>()};/// Module 2
-		const auto m {b.get_int<1>()};/// Module N
-
-		if (j%2_u8==0) {
+		const auto j{ UIntType(get<0>(rhs)) }; // Module 2
+		const auto m{ UIntType(get<1>(rhs)) }; // Module N
+		
+		if ((j%2_ui8)==0_ui8) {
 			const modint_cartprod_t R{i+j,m+k};
 			return R;
 		} else {
@@ -556,56 +570,57 @@ struct binop_t<group_name::Dih,uint,2_u8,N> {
 	}
 
 	static constexpr
-	modint_cartprod_t direct_product(
-		modint_cartprod_t a,
-		modint_cartprod_t b
-	) {
+	modint_cartprod_t direct_product(modint_cartprod_t a,modint_cartprod_t b) {
 		const modint_cartprod_t result{a+b};
 		return result;
 	}
 
 	static constexpr
-	modint_cartprod_t gr_bop (
-		modint_cartprod_t a,
-		modint_cartprod_t b
-	) {
+	modint_cartprod_t gr_bop (modint_cartprod_t a,modint_cartprod_t b) {
 		return Dih_product(a,b);
+	}
+	constexpr
+	modint_cartprod_t operator()(modint_cartprod_t lhs,modint_cartprod_t rhs) const {
+		return gr_bop(lhs,rhs);
 	}
 };
 
 
 template<uint N>
-struct binop_t<group_name::Dic,uint,2_u8,N>
+struct binop_t<group_name::Dic,uint,2_ui8,N>
 {
 	using type = binop_t;
 	using UIntType = uint;
 	using SIntType = signed_for_unsigned_t<UIntType>;
 	using LUIntType = next_int_t<unsigned_for_signed_t<SIntType>>;
-
-	using UIntType_pair =
-		typename std::pair<UIntType,UIntType>;
-	using modint_cartprod_t =
-		modint_cartprod_t<UIntType,2,2,3>;
+	using UIntType_pair = Ints_pair<UIntType>;
+	using modint_cartprod_t = modint_cartprod_t<UIntType,2_ui8,N>;
+	using base_t = typename modint_cartprod_t::base_t;
+	template<UIntType Idx> inline static constexpr
+	UIntType mod_idx() { return (get<Idx>(make_tuple(2_ui8,N)));}
+	template<UIntType kmod>
+	using modint_mod = modint_t<UIntType,kmod>;
+	template<size_t Idx>
+	using modint_idx = modint_mod<mod_idx<Idx>()>;
+	static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
+	static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
+	static constexpr UIntType dim() {return modint_cartprod_t::dim();}
+	static constexpr LUIntType card() {return modint_cartprod_t::card();}
 	
-	inline static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
-	inline static constexpr UIntType dim() {return modint_cartprod_t::dim();}
-	inline static constexpr LUIntType card() {return modint_cartprod_t::card();}
-
 	static_assert(N%2==0);
 
 	static constexpr
 	modint_cartprod_t Dic_product(
-		modint_cartprod_t a,
-		modint_cartprod_t b
+		modint_cartprod_t lhs,modint_cartprod_t rhs
 	) {
-		const UIntType i{a.get_int<0>()};
-		const UIntType j{b.get_int<0>()};
+		const UIntType i{UIntType(get<0>(lhs))};
+		const UIntType j{UIntType(get<0>(rhs))};
 		modint_cartprod_t sr{
-			binop_t<group_name::Dih,UIntType,2,N>::gr_bop(a,b)
+			binop_t<group_name::Dih,UIntType,2,N>::gr_bop(lhs,rhs)
 		};
 		if((i%2 != 0)||(j%2 != 0)) {
 			if ((i%2 ==1)&&( j%2==1)) {
-				sr.get_modint<1>() += (N/2);
+				get<1>(sr) += modint_idx<1>{N/2};
 			}
 		}
 		return sr;
@@ -627,12 +642,18 @@ struct binop_t<group_name::Dic,uint,2_u8,N>
 	) {
 		return Dic_product(a,b);
 	}
+	constexpr
+	modint_cartprod_t operator()(modint_cartprod_t lhs,modint_cartprod_t rhs) const {
+		return gr_bop(lhs,rhs);
+	}
 };
 
-template<typename UIntType,UIntType p,UIntType q>
-struct binop_t<group_name::GDih,UIntType,p,q>
+
+template<uint p,uint q>
+struct binop_t<group_name::GDih,uint,p,q>
 {
 	using type = binop_t;
+	using UIntType = uint;
 	using SIntType = signed_for_unsigned_t<UIntType>;
 	using LUIntType = next_int_t<unsigned_for_signed_t<SIntType>>;
 
@@ -641,12 +662,17 @@ struct binop_t<group_name::GDih,UIntType,p,q>
 	using modint_cartprod_t =
 		modint_cartprod_t<UIntType,p,q>;
 	
-	inline static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
-	inline static constexpr UIntType dim() {return modint_cartprod_t::dim();}
-	inline static constexpr LUIntType card() {return modint_cartprod_t::card();}
+	using base_t = typename modint_cartprod_t::base_t;
+	template<UIntType k>
+	using modint_mod = modint_t<UIntType,k>;
+	template<size_t K>
+	using modint_idx = modint_t<UIntType,get<K>(modint_cartprod_t::mod_tup())>;
+	
+	static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
+	static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
+	static constexpr UIntType dim() {return modint_cartprod_t::dim();}
+	static constexpr LUIntType card() {return modint_cartprod_t::card();}
 
-	static_assert(p>1);
-	static_assert(q>1);
 	static_assert(p<q);
 	static_assert(is_prime(p));
 	static_assert(is_prime(q));
@@ -663,10 +689,10 @@ struct binop_t<group_name::GDih,UIntType,p,q>
 		modint_cartprod_t a,
 		modint_cartprod_t b
 	) {
-		const UIntType i{a.get_int<0>()};
-		const UIntType j{a.get_int<1>()};
+		const UIntType i{UIntType(get<0>(a))};
+		const UIntType j{UIntType(get<1>(a))};
 		
-		const UIntType k{b.get_int<0>()};
+		const UIntType k{UIntType(get<0>(b))};
 		const modint_cartprod_t resultado{
 			i, r_(k)*j
 		};
@@ -703,16 +729,16 @@ struct binop_t<group_name::GDih,UIntType,p,q>
 			resultado{GDih_product(a,b)};
 		return resultado;
 	}
+	constexpr
+	modint_cartprod_t operator()(modint_cartprod_t lhs,modint_cartprod_t rhs) const {
+		return gr_bop(lhs,rhs);
+	}
 };
 
-template<
-	typename UIntType,
-	UIntType N4,
-	UIntType N3,
-	UIntType N2,
-	UIntType N1	>
-struct binop_t<group_name::PD_Cyc,UIntType,N4,N3,N2,N1> {
+template< uint N4,uint N3,uint N2,uint N1 >
+struct binop_t<group_name::PD_Cyc,uint,N4,N3,N2,N1> {
 	using type = binop_t;
+	using UIntType = uint;
 	using SIntType = signed_for_unsigned_t<UIntType>;
 	using LUIntType = next_int_t<unsigned_for_signed_t<SIntType>>;
 
@@ -720,17 +746,16 @@ struct binop_t<group_name::PD_Cyc,UIntType,N4,N3,N2,N1> {
 		typename std::pair<UIntType,UIntType>;
 	using modint_cartprod_t =
 		modint_cartprod_t<UIntType,N4,N3,N2,N1>;
-	
-	inline static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
-	inline static constexpr UIntType dim() {return modint_cartprod_t::dim();}
-	inline static constexpr LUIntType card() {return modint_cartprod_t::card();}
-
-
-	static_assert(N4>1);
-	static_assert(N3>1);
-	static_assert(N2>1);
-	static_assert(N1>1);
-	
+	using base_t = typename modint_cartprod_t::base_t;
+	template<UIntType kmod>
+	using modint_mod = modint_t<UIntType,kmod>;
+	template<size_t idx>
+	using modint_idx = modint_t<UIntType,get<idx>(modint_cartprod_t::mod_tup())>;
+	static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
+	static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
+	static constexpr UIntType dim() {return modint_cartprod_t::dim();}
+	static constexpr LUIntType card() {return modint_cartprod_t::card();}
+		
 	static constexpr
 	modint_cartprod_t direct_product(
 		modint_cartprod_t a,
@@ -747,19 +772,19 @@ struct binop_t<group_name::PD_Cyc,UIntType,N4,N3,N2,N1> {
 	) {
 		return direct_product(a,b);
 	}
+	constexpr
+	modint_cartprod_t operator()(modint_cartprod_t lhs,modint_cartprod_t rhs) const {
+		return gr_bop(lhs,rhs);
+	}
 };
 
 template<
 	group_name gn,
-	typename UIntType,
-	UIntType N5,
-	UIntType N4,
-	UIntType N3,
-	UIntType N2,
-	UIntType N1
+	uint N5,uint N4,uint N3,uint N2,uint N1
 >
-struct binop_t<gn,UIntType,N5,N4,N3,N2,N1>	{
+struct binop_t<gn,uint,N5,N4,N3,N2,N1>	{
 	using type = binop_t;
+	using UIntType = uint;
 	using SIntType = signed_for_unsigned_t<UIntType>;
 	using LUIntType = next_int_t<unsigned_for_signed_t<SIntType>>;
 
@@ -768,22 +793,22 @@ struct binop_t<gn,UIntType,N5,N4,N3,N2,N1>	{
 	using modint_cartprod_t =
 		modint_cartprod_t<UIntType,N5,N4,N3,N2,N1>;
 	
-	inline static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
-	inline static constexpr UIntType dim() {return modint_cartprod_t::dim();}
-	inline static constexpr LUIntType card() {return modint_cartprod_t::card();}
-
-	static_assert(N5>1);
-	static_assert(N4>1);
-	static_assert(N3>1);
-	static_assert(N2>1);
-	static_assert(N1>1);
+	using base_t = typename modint_cartprod_t::base_t;
+	template<UIntType k>
+	using modint_mod = modint_t<UIntType,k>;
+	template<size_t K>
+	using modint_idx = modint_t<UIntType,get<K>(modint_cartprod_t::mod_tup())>;
+	
+	static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
+	static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
+	static constexpr UIntType dim() {return modint_cartprod_t::dim();}
+	static constexpr LUIntType card() {return modint_cartprod_t::card();}
 	
 	static_assert(gn==group_name::PD_Cyc);
 	
 	static constexpr
 	modint_cartprod_t direct_product(
-		modint_cartprod_t a,
-		modint_cartprod_t b
+		modint_cartprod_t a,modint_cartprod_t b
 	)  {
 		const modint_cartprod_t result{a+b};
 		return result;
@@ -791,33 +816,25 @@ struct binop_t<gn,UIntType,N5,N4,N3,N2,N1>	{
 
 	static constexpr
 	modint_cartprod_t semi_direct_product(
-		modint_cartprod_t a,
-		modint_cartprod_t b
+		modint_cartprod_t a,modint_cartprod_t b
 	) {
 		return direct_product(a,b);
 	}
 
 	static constexpr
 	modint_cartprod_t gr_bop(
-		modint_cartprod_t a,
-		modint_cartprod_t b
+		modint_cartprod_t a,modint_cartprod_t b
 	) {
 		return direct_product(a,b);
 	}
 };
 
-
 template<
 	group_name gn,
-	typename UIntType
-	UIntType N6,
-	UIntType N5,
-	UIntType N4,
-	UIntType N3,
-	UIntType N2,
-	UIntType N1			>
-struct binop_t<gn,UIntType,N6,N5,N4,N3,N2,N1> {
+	uint N6,uint N5,uint N4,uint N3,uint N2,uint N1>
+struct binop_t<gn,uint,N6,N5,N4,N3,N2,N1> {
 	using type = binop_t;
+	using UIntType = uint;
 	using SIntType = signed_for_unsigned_t<UIntType>;
 	using LUIntType = next_int_t<unsigned_for_signed_t<SIntType>>;
 
@@ -826,39 +843,37 @@ struct binop_t<gn,UIntType,N6,N5,N4,N3,N2,N1> {
 	using modint_cartprod_t =
 		modint_cartprod_t<UIntType,N6,N5,N4,N3,N2,N1>;
 	
-	inline static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
-	inline static constexpr UIntType dim() {return modint_cartprod_t::dim();}
-	inline static constexpr LUIntType card() {return modint_cartprod_t::card();}
-
-	static_assert(N6>1);
-	static_assert(N5>1);
-	static_assert(N4>1);
-	static_assert(N3>1);
-	static_assert(N2>1);
-	static_assert(N1>1);
+	using base_t = typename modint_cartprod_t::base_t;
+	template<UIntType k>
+	using modint_mod = modint_t<UIntType,k>;
+	template<size_t K>
+	using modint_idx = modint_t<UIntType,get<K>(modint_cartprod_t::mod_tup())>;
+	
+	static constexpr UIntType max_mod() {return modint_cartprod_t::max_mod();}
+	static constexpr UIntType min_mod() {return modint_cartprod_t::min_mod();}
+	static constexpr UIntType dim() {return modint_cartprod_t::dim();}
+	static constexpr LUIntType card() {return modint_cartprod_t::card();}
+	
 	static_assert(gn==group_name::PD_Cyc);
 	
 	static constexpr
 	modint_cartprod_t direct_product(
-		modint_cartprod_t a,
-		modint_cartprod_t b
+		modint_cartprod_t a,modint_cartprod_t b
 	)  {
-		const modint_cartprod_t{a+b};
+		const modint_cartprod_t result{a+b};
 		return result;
 	}
 
 	static constexpr
 	modint_cartprod_t semi_direct_product(
-		modint_cartprod_t a,
-		modint_cartprod_t b
+		modint_cartprod_t a,modint_cartprod_t b
 	) {
 		return direct_product(a,b);
 	}
 
 	static constexpr
 	modint_cartprod_t gr_bop(
-		modint_cartprod_t a,
-		modint_cartprod_t b
+		modint_cartprod_t a,modint_cartprod_t b
 	) {
 		return direct_product(a,b);
 	}

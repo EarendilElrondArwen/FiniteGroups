@@ -49,7 +49,7 @@ namespace tfg::impl {
 				std::is_same_v<A,sint>	||
 				std::is_same_v<A,ssint>	||
 				std::is_same_v<A,slint>	||
-				std::is_same_v<A,sllint>		
+				std::is_same_v<A,sllint>
 			) 
 				return true;
 			else 

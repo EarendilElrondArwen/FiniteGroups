@@ -34,7 +34,7 @@
 namespace tfg {
 
 template<group_name gn,uint N_n,uint ...N_nm1>
-struct element_of_group_t :
+struct magma_t :
 	public element_of_set_t<N_n,N_nm1...>
 {
 	static_assert(N_n>1);
@@ -43,7 +43,7 @@ struct element_of_group_t :
 	using op_t		=
 		group_binop_t< gn , N_n , N_nm1... >;
 	using elem_gr_t	=
-		element_of_group_t;
+		magma_t;
 
 	static constexpr uint max_N 				=
 		elem_t::max_N;
@@ -57,17 +57,17 @@ struct element_of_group_t :
 	//////////////////////////////////////////////
 
 	constexpr
-	element_of_group_t()=default;
+	magma_t()=default;
 
 	constexpr
-	element_of_group_t(	const elem_t & elem_arg) :
+	magma_t(	const elem_t & elem_arg) :
 		elem_t(elem_arg) {}
 
 	constexpr
-	element_of_group_t(const elem_gr_t &)=default;
+	magma_t(const elem_gr_t &)=default;
 
 	constexpr
-	element_of_group_t(elem_gr_t &&)=default;
+	magma_t(elem_gr_t &&)=default;
 
 	//////////////////////////////////////////////
 	//				ASSIGNS						//

@@ -18,6 +18,7 @@
 #include <optional>
 #include <functional>
 #include <initializer_list>
+#include <array>
 
 #include "basic_types_metaprogramming_on_integers_types.hpp"
 #include "factoring_ct.hpp"
@@ -50,6 +51,7 @@ namespace tfg::impl {
     using std::endl;
     using std::cout;
     using std::cin;
+	using std::array;
 
     template<typename T>
     using	initializer_list_it_t =	typename
@@ -268,46 +270,6 @@ namespace tfg::impl {
 		}
 	};
 	
-	template <
-		typename UIntType,
-		UIntType First,
-		UIntType Actual,
-		UIntType OnePastLast	>
-	struct simple_static_for {
-		static_assert(
-				(First <= Actual)&&(Actual <= OnePastLast),
-				"Rango ascendente mal diseñado o "
-				"indice actual fuera de rango"
-		);
-
-		template <
-			typename Fn,
-			typename Tuple_1_T,
-			typename Tuple_2_T,
-			typename UInt_Type
-		>
-		inline constexpr
-		void operator()(
-			Fn fn,
-			Tuple_1_T & tuple_arg_1,
-			Tuple_2_T & tuple_arg_2
-		) const {
-			if constexpr (
-					(First <= Actual)	&&
-					(Actual < OnePastLast)
-				) {
-					fn(tuple_arg_1,tuple_arg_1,Actual);
-					const simple_static_for<
-						UInt_Type,
-						First,
-						Actual+1,
-						OnePastLast
-					>   	RecursiveFnObj{};
-					RecursiveFnObj(fn,tuple_arg_1,tuple_arg_2);
-			} else {}
-		}
-	};
-
 	template<
 		typename	IntType,
 		unsigned_for_signed_t<IntType>...Is,

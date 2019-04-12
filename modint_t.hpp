@@ -1,5 +1,5 @@
 /*
- * modint_t_t.hpp
+ * modint_t.hpp
  *
  * Copyright 2018 Julian Calderon Almendros
  * <julian.calderon.almendros@gmail.com>
@@ -26,7 +26,6 @@
 #define modint_tN_T__HPP__INCLUDED
 
 #include <utility>
-#include <tuple>
 #include <string>
 #include "tuple_t.hpp"
 
@@ -36,8 +35,6 @@ using std::size_t;
 using std::numeric_limits;
 template<typename T>
 auto digits = numeric_limits<T>::digits;
-using std::tuple;
-using std::get;
 using std::is_integral_v;
 using std::is_same_v;
 
@@ -64,20 +61,20 @@ struct modint_t
 ///////////////////////////////
 /// CONSTRUCTORS BY DEFAULT ///
 ///////////////////////////////
-	inline constexpr
+	constexpr
 	modint_t() = default;
 
-	inline constexpr
+	constexpr
 	modint_t(const modint_t &) = default;
 
-	inline constexpr
+	constexpr
 	modint_t(modint_t &&)=default;
 /////////////////////////////////////////////
 /// OPERATOR CONVERSION TO INTEGRAL TYPES ///
 /////////////////////////////////////////////
 	
 	template<typename T>
-	inline constexpr
+	constexpr
 	explicit
 	operator T() const {
 		static_assert(
@@ -90,12 +87,12 @@ struct modint_t
 
 public:
 ///////////////////////////////////
-/// CONSTRUCTORS BY NON-DEFAULT ///
+/// CONSTRUCTORS NON-DEFAULT    ///
 /// ONLY FOR INTEGRAL TYPES		///
 /// EXPLICIT EXPLICIT EXPLICIT	///
 ///////////////////////////////////	
 	template<typename Int_t>
-	inline constexpr
+	constexpr
 	explicit 
 	modint_t(Int_t k) :
 		m_i{to_UIntType<Int_t,UIntType,N>(k)}
@@ -103,53 +100,59 @@ public:
 ///////////////////////////////////
 /// ASSIGNATIONS BY DEFAULT 	///
 ///////////////////////////////////
-	inline
+	constexpr
 	modint_t & operator=(modint_t &)=default;
-
-	inline
-	modint_t &
-	operator=(modint_t &&)=default;
+	
+	constexpr
+	const modint_t & operator=(const modint_t & arg){
+		if (this != &arg)
+			m_i = arg.m_i;
+		return (*this);
+	}
+	
+	constexpr
+	modint_t & operator=(modint_t &&)=default;
 
 ////////////////////////////////////////////
 /// OPERATORS FOR COMPARATING AND ORDERS ///
 ////////////////////////////////////////////
 
-	inline constexpr
+	constexpr
 	bool operator==(
 		const modint_t & b
 	) const	{
 		return (this->m_i==b.m_i);
 	}
 
-	inline constexpr
+	constexpr
 	bool operator != (
 		const modint_t & b
 	) const {
 		return (this->m_i!=b.m_i);
 	}
 
-	inline constexpr
+	constexpr
 	bool operator < (
 		const modint_t & b
 	) const {
 		return (this->m_i < b.m_i);
 	}
 
-	inline constexpr
+	constexpr
 	bool operator > (
 		const modint_t & b
 	) const {
 		return (this->m_i > b.m_i);
 	}
 
-	inline constexpr
+	constexpr
 	bool operator <= (
 		const modint_t & b
 	) const {
 		return (this->m_i <= b.m_i);
 	}
 
-	inline constexpr
+	constexpr
 	bool operator >= (
 		const modint_t & b
 	) const	{
@@ -160,7 +163,7 @@ public:
 /// ARITHMETIC OPERATORS CONST TYPES 	///
 ///////////////////////////////////////////
 	
-	inline constexpr
+	constexpr
 	modint_t operator + (
 		const modint_t & b
 	) const {
@@ -171,13 +174,13 @@ public:
 		return result;
 	}
 
-	inline constexpr
+	constexpr
 	modint_t operator -(const modint_t & b) const {
 		const auto neg_b{-b};
 		return ((*this)+neg_b);
 	}
 
-	inline constexpr
+	constexpr
 	modint_t operator* (modint_t b) const	{
 		using LUIntType = next_int_t<next_int_t<UIntType>>;
 		using LLUIntType = next_int_t<LUIntType>;
@@ -198,7 +201,7 @@ public:
 /// ARITHMETIC OPERATORS NON-CONST TYPES///
 ///////////////////////////////////////////
 	
-	inline
+	constexpr
 	const modint_t & operator += (const modint_t & b)	{
 		this->m_i+=b.m_i;
 		if (this->m_i>N-1)
@@ -206,14 +209,14 @@ public:
 		return (*this);
 	}
 
-	inline
+	constexpr
 	const modint_t & operator -= (const modint_t & b)
 	{
 		*this += (-b);
 		return (*this);
 	}
 
-	inline
+	constexpr
 	const modint_t & operator*= (const modint_t & b)
 	{
 		const ullint m_i_result{static_cast<ullint>(((this->m_i)*(b.m_i))%N)};
@@ -232,61 +235,56 @@ public:
 /// 	overload for OPERATOR !()				///
 ///////////////////////////////////////////////////
 	
-	inline
+	constexpr
 	const modint_t & mCBm1(){
 		//autocomplementa a la base N menos 1
 		(this->m_i) = (N-1)-(this->m_i);
 		return (*this);
 	}
 	
-	inline
+	constexpr
 	modint_t operator !() {
 		this->mCBm1();
 		return (*this);
 	}
 	
-	inline constexpr
+	constexpr
 	modint_t CBm1() const {
 		//devuelve el complemento a la base N menos 1
 		const modint_t result{UIntType((N-1)-(this->m_i))};
 		return result;
 	}
 	
-	inline constexpr
+	constexpr
 	modint_t operator~() const {
 		const modint_t result{this->CBm1()};
 		return result;
 	}
 	
-	inline
-	std::pair<const modint_t,modint_t> mCB() {
-		//autocomplementa a la base N menos 1
-		std::pair<modint_t,modint_t> result{*this,modint_t{0}};
+	constexpr
+	const modint_t & mCB() {
+		//autocomplementa a la base N
 		if constexpr(N==2) {
-			result.second = N-1-result.first;
 		} else {
 			const bool neq_0{m_i==0};
-			result.first = modint_t(neq_0?(0):(m_i=N-m_i));
-			result.second = modint_t(neq_0?(1):(0));
+			m_i = modint_t(neq_0?(0):(m_i=N-m_i));
 		}
-		return result;
+		return (*this);
 	}
 	
-	inline constexpr
+	constexpr
 	modint_t operator -() const {
 		return modint_t((m_i==0)?(0):(N-m_i));
 	}
 	
-	inline constexpr
-	std::pair<modint_t,modint_t> CB() const	{
-		//devuelve el complemento a la base N menos 1
-		std::pair<modint_t,modint_t> result{*this,modint_t{0}};
+	constexpr
+	modint_t CB() const	{
+		//devuelve el complemento a la base N
+		modint_t result{*this};
 		if constexpr(N==2) {
-			result.second = N-1-result.first;
 		} else {
 			const bool neq_0{m_i==0};
-			result.first = modint_t(neq_0?0:(N-m_i));
-			result.second = modint_t(neq_0?1:0);
+			result.m_i = modint_t(neq_0?0:(N-m_i));
 		}
 		return result;
 	}
@@ -294,7 +292,7 @@ public:
 /// NEXT AND PREV FUNCTIONS FOR CONSTEXPR AND NON-CONSTEXPR	///
 /// OPERATORS ++ AND -- PRE AND POST						/// 
 ///////////////////////////////////////////////////////////////	
-	inline constexpr
+	constexpr
 	modint_t next() const {
 		const modint_t previous_result{*this};
 		const modint_t result{
@@ -307,7 +305,7 @@ public:
 		return result;
 	}
 	
-	inline constexpr
+	constexpr
 	modint_t prev() const {
 		const modint_t previous_result{*this};
 		const modint_t result{
@@ -320,7 +318,7 @@ public:
 		return result;
 	}
 	
-	inline
+	constexpr
 	const modint_t & operator++()
 	{
 		++(this->m_i);
@@ -329,7 +327,7 @@ public:
 		return (*this);
 	}
 
-	inline
+	constexpr
 	const modint_t & operator--()
 	{
 		if (m_i > 0)
@@ -339,7 +337,7 @@ public:
 		return (*this);
 	}
 
-	inline
+	constexpr
 	modint_t operator++(int)
 	{
 		const UIntType result{this->m_i};
@@ -347,7 +345,7 @@ public:
 		return modint_t(UIntType(result));
 	}
 
-	inline
+	constexpr
 	modint_t operator--(int)
 	{
 		const auto result{this->m_i};
@@ -359,14 +357,14 @@ public:
 ///		INV FOR CONSTEXPR		///
 ///		INVERT FOR NON-CONSTEXPR///
 ///////////////////////////////////	
-	inline constexpr
+	constexpr
 	modint_t inv() const {
 		modint_t result{*this};
 		result.invert();
 		return (result);
 	}
 
-	inline
+	constexpr
 	const modint_t & invert() {
 		using SIntType = signed_for_unsigned_t<UIntType>;
 		const auto preresult{modInv<SIntType,N>(m_i)};
@@ -378,13 +376,13 @@ public:
 /// OPERATOR / FOR CONSTEXPR	   	///
 /// OPERATOR /= FOR NON_CONSTEXPR  	///
 ///////////////////////////////////////	
-	inline constexpr
+	constexpr
 	modint_t operator / (const modint_t & b) const {
 		const modint_t b_inv{b.inv()};
 		return (*this)*b_inv;
 	}
 
-	inline
+	constexpr
 	const modint_t & operator /= (const modint_t & b) {
 		const modint_t b_inv{b.inv()};
 		return ((*this)*=b_inv);
@@ -397,7 +395,7 @@ public:
 ///////////////////////////////////////	
 	
 	template<typename UInt_t>
-	inline constexpr
+	constexpr
 	modint_t pow(UInt_t n) const {
 		static_assert(
 			is_unsigned_int_t_v<UInt_t>,
@@ -423,7 +421,7 @@ public:
 	}
 	
 	template<typename UInt_t>
-	inline constexpr
+	constexpr
 	const modint_t & m_pow(UInt_t n) {
 		static_assert(
 			is_unsigned_int_t_v<UInt_t>,
@@ -450,7 +448,7 @@ public:
 	}
 	
 	template<typename Int_t>
-	inline constexpr
+	constexpr
 	modint_t operator^(Int_t n) const {
 		if constexpr (is_unsigned_int_t_v<Int_t>) {
 			return this->pow<Int_t>(n);
@@ -467,7 +465,7 @@ public:
 	}
 
 	template<typename Int_t>
-	inline
+	constexpr
 	const modint_t & operator^= (Int_t n) {
 		if constexpr (is_unsigned_int_t_v<Int_t>) {
 			return (this->m_pow<Int_t>(n));
@@ -492,6 +490,56 @@ public:
 		std::string R{std::to_string(u)};
 		std::string B{std::to_string(N)};
 		return (R + "_B" + B);
+	}
+/////////////////////////////////////////////////////////
+/// HELPING FUNCTIONS TO SELFWIRTE FOR SPECIAL VALUES ///
+/////////////////////////////////////////////////////////
+	constexpr
+	void selfwrite_max() {
+		m_i = N-static_cast<UIntType>(1);
+	}
+	constexpr
+	void selfwrite_0() {
+		m_i = static_cast<UIntType>(0);
+	}
+	constexpr
+	void selfwrite_1() {
+		m_i = static_cast<UIntType>(1);
+	}
+//////////////////////////////////////////
+/// HELPING FUNCTIONS TO BOOLEAN TEST  ///
+//////////////////////////////////////////
+	constexpr
+	bool is_max() const {
+		return (m_i==(N-static_cast<UIntType>(1)));
+	}
+	constexpr
+	bool is_min() const {
+		return (m_i==static_cast<UIntType>(0));
+	}
+	constexpr
+	bool is_0() const {
+		return (m_i==static_cast<UIntType>(0));
+	}
+	constexpr
+	bool is_1() const {
+		return (m_i==static_cast<UIntType>(1));
+	}
+	constexpr
+	bool is_not_max() const {
+		return (m_i!=(N-static_cast<UIntType>(1)));
+	}
+	constexpr
+	bool is_not_min() const {
+		return (m_i!=static_cast<UIntType>(0));
+	}
+	constexpr
+	bool is_not_0() const {
+		return (m_i!=static_cast<UIntType>(0));
+	}
+	constexpr
+	bool is_not_1() const {
+		return (m_i!=static_cast<UIntType>(1));
 	}
 };
 
@@ -540,6 +588,8 @@ modint_t<UIntType,N> operator*(modint_t<UIntType,N> A,Int_t a) {
 	const modint_t<UIntType,N> B{UIntType(to_UIntType<Int_t,UIntType,N>(a))};
 	return (A*B);
 }
+
+
 
 }
 #endif //modint_tN_T__HPP__INCLUDED

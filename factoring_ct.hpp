@@ -153,5 +153,19 @@ bool is_prime(ullint n) {
 			)
 		);
 }
+
+enum class n_case {
+	z,u,d,t,q,c,s
+};
+enum class t_case {
+	I,
+	A,B,C,D,E,F,
+	AB,AC,AD,AE,AF,BC,BD,BE,BF,CD,CE,CF,DE,DF,EF,
+	ABC,ABD,ABE,ABF,ACD,ACE,ACF,ADE,ADF,AEF,BCD,BCE,BCF,BDE,BDF,BEF,CDE,CDF,CEF,DEF,
+	ABCD,ABCE,ABDE,ACDE,BCDE,ABCF,ABDF,ACDF,BCDF,ABEF,ACEF,BCEF,ADEF,BDEF,CDEF,
+	ABCDE,ABCDF,ABCEF,ABDEF,ACDEF,BCDEF,
+	ABCDEF
+};
+
 }
 #endif // FACTORING_CT_HPP_INCLUDED
